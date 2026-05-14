@@ -2,830 +2,577 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>프로젝트 진척 대시보드 · SIH2FC</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HCNS 대시보드 · SIH2FC</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root {
-    --bg: #ffffff;
-    --bg-2: #f5f3ee;
-    --paper: #ffffff;
-    --paper-warm: #fafaf8;
-    --ink: #1f1d1a;
-    --ink-2: #3a3631;
-    --soft: #6b665d;
-    --softer: #8e887e;
-    --line: #ececec;
-    --line-strong: #d8d8d8;
-
-    --mocha: #6f4e37;
-    --mocha-bg: #ede2d3;
-    --mocha-light: #b08968;
-    --terracotta: #c2410c;
-    --terracotta-bg: #fae5d3;
-    --sage: #87976e;
-    --sage-bg: #dde4d0;
-    --olive: #6b7d3a;
-    --plum: #6b4e71;
-    --plum-bg: #e8dcec;
-    --slate: #475569;
-    --slate-bg: #dbe2ea;
-    --gold: #b8860b;
-    --gold-bg: #f5ebd0;
-
-    --shadow-soft: 0 1px 2px rgba(31,29,26,0.04), 0 4px 12px rgba(31,29,26,0.04);
-    --shadow-hover: 0 2px 4px rgba(31,29,26,0.06), 0 12px 32px rgba(31,29,26,0.08);
+    --indigo:       #4F46E5;
+    --indigo-light: #EEF2FF;
+    --green:        #10B981;
+    --green-light:  #ECFDF5;
+    --amber:        #F59E0B;
+    --red:          #EF4444;
+    --dark:         #111827;
+    --text:         #111827;
+    --text-2:       #374151;
+    --muted:        #6B7280;
+    --lighter:      #9CA3AF;
+    --bg:           #F3F4F6;
+    --card:         #FFFFFF;
+    --border:       #E5E7EB;
+    --border-2:     #D1D5DB;
+    --shadow:       0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md:    0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.04);
+    --sidebar-w:    224px;
+    --topbar-h:     56px;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; }
   html, body {
-    font-family: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--ink);
-    line-height: 1.5;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background: var(--bg); color: var(--text);
+    font-size: 14px; line-height: 1.5; height: 100%;
     -webkit-font-smoothing: antialiased;
-    font-feature-settings: "ss01", "ss02";
-  }
-  .serif { font-family: 'Pretendard Variable', 'Pretendard', sans-serif; font-weight: 200; }
-  .mono  { font-family: 'JetBrains Mono', monospace; }
-
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      radial-gradient(circle at 20% 10%, rgba(184,134,11,0.025) 0, transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(135,151,110,0.025) 0, transparent 40%);
-    pointer-events: none; z-index: 0;
-  }
-  .page { max-width: 1240px; margin: 0 auto; padding: 48px 32px 96px; position: relative; z-index: 1; }
-
-  header { margin-bottom: 40px; display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 32px; }
-  .breadcrumb { font-size: 13px; color: var(--soft); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .breadcrumb a { color: var(--soft); text-decoration: none; transition: color 0.15s; }
-  .breadcrumb a:hover { color: var(--ink); }
-  .breadcrumb .sep { color: var(--line-strong); }
-  .breadcrumb .current { color: var(--ink); font-weight: 500; }
-
-  h1 {
-    font-family: 'Pretendard Variable', 'Pretendard', sans-serif;
-    font-weight: 200;
-    font-size: 64px;
-    letter-spacing: -0.03em;
-    line-height: 1.05;
-    margin-bottom: 20px;
-    color: var(--ink);
-  }
-  h1 .label { font-weight: 700; letter-spacing: -0.02em; }
-  h1 .accent { color: var(--terracotta); font-weight: 200; }
-
-  .meta-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-  .meta-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px;
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: 100px;
-    font-size: 12px;
-    color: var(--ink-2);
-  }
-  .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); }
-  .meta-pill.live .dot {
-    background: #22c55e;
-    animation: livePulse 2s ease-in-out infinite;
-    box-shadow: 0 0 0 0 rgba(34,197,94,0.6);
-  }
-  @keyframes livePulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
-    50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
   }
 
+  /* ── App Shell ── */
+  .app { display:flex; height:100vh; overflow:hidden; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink:0;
+    background: var(--card); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; padding:20px 12px; overflow-y:auto;
+  }
+  .sidebar-logo {
+    padding:4px 8px 20px;
+    border-bottom:1px solid var(--border); margin-bottom:20px;
+  }
+  .nav-section-label {
+    font-size:10px; font-weight:700; color:var(--lighter);
+    text-transform:uppercase; letter-spacing:0.1em;
+    padding:0 10px 8px; margin-top:4px;
+  }
+  .nav-item {
+    display:flex; align-items:center; gap:9px;
+    padding:9px 10px; border-radius:9px;
+    font-size:13px; font-weight:500; color:var(--muted);
+    text-decoration:none; transition:all 0.15s; margin-bottom:2px;
+  }
+  .nav-item:hover { background:var(--bg); color:var(--text); }
+  .nav-item.active { background:var(--dark); color:white; box-shadow:var(--shadow-md); }
+  .nav-icon  { font-size:15px; flex-shrink:0; width:20px; text-align:center; }
+  .nav-svg   { flex-shrink:0; width:20px; opacity:0.55; }
+  .nav-item.active .nav-svg { opacity:1; }
+  .nav-label { flex:1; }
+  .nav-badge {
+    font-size:11px; font-weight:600;
+    background:rgba(0,0,0,0.08); color:var(--muted);
+    padding:1px 7px; border-radius:100px;
+  }
+  .nav-item.active .nav-badge { background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.85); }
+  .sidebar-footer { margin-top:auto; padding-top:16px; border-top:1px solid var(--border); }
+
+  /* ── Main Wrap ── */
+  .main-wrap { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+
+  /* ── Topbar ── */
+  .topbar {
+    height:var(--topbar-h); background:var(--card);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; padding:0 24px; gap:16px; flex-shrink:0;
+  }
+  .topbar-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+  .topbar-badge {
+    font-size:11px; font-weight:600;
+    background:var(--indigo-light); color:var(--indigo);
+    padding:4px 10px; border-radius:100px;
+    display:flex; align-items:center; gap:5px;
+  }
+  .live-dot {
+    width:6px; height:6px; border-radius:50%; background:#22c55e;
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow:0 0 0 0 rgba(34,197,94,0.5); }
+    50%      { box-shadow:0 0 0 5px rgba(34,197,94,0); }
+  }
+  .topbar-time { font-size:12px; color:var(--muted); }
+  .theme-toggle {
+    width:34px; height:34px; border-radius:8px;
+    border:1px solid var(--border); background:var(--bg); color:var(--muted);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all 0.15s; flex-shrink:0;
+  }
+  .theme-toggle:hover { background:var(--card); color:var(--text); }
+
+  /* ── Content Scroll ── */
+  .content-scroll { flex:1; overflow-y:auto; padding:24px; }
+
+  /* ── Page Header ── */
+  .page-header {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    margin-bottom:20px;
+  }
+  .page-title {
+    font-size:32px; font-weight:700; letter-spacing:-0.02em; color:var(--dark);
+    line-height:1.1;
+  }
+  .page-title .pct-highlight { color:#FF6B35; }
+  .page-meta {
+    display:flex; align-items:center; gap:16px; margin-top:6px;
+    font-size:12px; color:var(--muted);
+  }
+  .page-meta span { display:flex; align-items:center; gap:4px; }
   .refresh-btn {
-    margin-left: auto;
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 16px;
-    background: var(--ink);
-    color: var(--bg);
-    border: none;
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
+    padding:8px 16px; background:var(--dark); color:white;
+    border:none; border-radius:8px; font-family:inherit;
+    font-size:13px; font-weight:600; cursor:pointer;
+    text-decoration:none; display:flex; align-items:center; gap:6px;
+    transition:background 0.15s; flex-shrink:0; margin-top:4px;
   }
-  .refresh-btn:hover { background: var(--mocha); transform: translateY(-1px); }
+  .refresh-btn:hover { background:var(--indigo); }
 
-  .tabs-wrap {
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 6px;
-    display: flex;
-    gap: 2px;
-    margin-bottom: 32px;
-    overflow-x: auto;
-    box-shadow: var(--shadow-soft);
-  }
-  .tab {
-    padding: 10px 18px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--soft);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-    display: flex; align-items: center; gap: 8px;
-    text-decoration: none;
-  }
-  .tab:hover { background: var(--bg-2); color: var(--ink); }
-  .tab.active { background: var(--ink); color: var(--bg); box-shadow: 0 2px 6px rgba(31,29,26,0.15); }
-  .tab .count { font-size: 11px; padding: 2px 7px; border-radius: 100px; background: rgba(0,0,0,0.06); }
-  .tab.active .count { background: rgba(255,255,255,0.15); color: var(--bg); }
-
-  .hero-stats { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; gap: 14px; margin-bottom: 36px; }
-  .stat-card {
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 22px 20px;
-    position: relative;
-    transition: all 0.2s;
-    overflow: hidden;
-  }
-  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
-  .stat-card.featured {
-    background: linear-gradient(135deg, var(--ink) 0%, #2d2823 100%);
-    color: var(--bg);
-    border-color: var(--ink);
-  }
-  .stat-card.featured::before {
-    content: '';
-    position: absolute;
-    top: -50%; right: -20%;
-    width: 280px; height: 280px;
-    background: radial-gradient(circle, rgba(194,65,12,0.25) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .stat-card.featured::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, var(--terracotta), var(--gold));
+  /* ── Card ── */
+  .card {
+    background:var(--card); border-radius:14px;
+    border:1px solid var(--border); box-shadow:var(--shadow);
   }
 
-  .sc-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--softer);
-    margin-bottom: 14px;
-    font-weight: 500;
-  }
-  .stat-card.featured .sc-label { color: rgba(246,243,237,0.55); }
+  /* ── KPI 5열 ── */
+  .kpi-5 { display:grid; grid-template-columns:1.8fr 1fr 1fr 1fr 1fr; gap:14px; margin-bottom:24px; }
 
-  .sc-value {
-    font-family: 'Pretendard Variable', 'Pretendard', sans-serif;
-    font-weight: 200;
-    font-size: 48px;
-    line-height: 0.95;
-    letter-spacing: -0.04em;
-    color: var(--ink);
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
+  .kpi-hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    border:none; padding:20px 22px; color:white;
   }
-  .stat-card.featured .sc-value { color: var(--bg); }
-  .sc-value .unit {
-    font-family: 'Pretendard Variable', sans-serif;
-    font-size: 18px;
-    color: var(--soft);
-    font-weight: 400;
+  .hero-content { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .hero-left { flex:1; }
+  .hero-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.5); margin-bottom:8px; }
+  .hero-number { font-size:30px; font-weight:700; letter-spacing:-0.02em; line-height:1; color:white; margin-bottom:6px; }
+  .hero-unit { font-size:14px; font-weight:500; color:rgba(255,255,255,0.5); }
+  .hero-sub { font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:10px; }
+  .hero-badge-good { font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; background:rgba(16,185,129,0.2); color:#34D399; }
+  .hero-badge-bad  { font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; background:rgba(239,68,68,0.2); color:#F87171; }
+  .hero-badge-done { font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; background:rgba(79,70,229,0.3); color:#A5B4FC; }
+  .hero-ring-wrap { flex-shrink:0; margin-left:12px; }
+  .hero-ring {
+    width:80px; height:80px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
   }
-  .stat-card.featured .sc-value .unit { color: rgba(246,243,237,0.6); }
+  .hero-ring-inner {
+    width:60px; height:60px; border-radius:50%;
+    background:#1a1a2e;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero-pct { font-size:16px; font-weight:700; color:white; }
+  .hero-bar-track { height:4px; background:rgba(255,255,255,0.12); border-radius:100px; overflow:hidden; }
+  .hero-bar-fill  { height:100%; border-radius:100px; background:linear-gradient(90deg,#FF6B35,#FF8C42); transition:width 0.7s; }
 
-  .sc-meta {
-    margin-top: 16px;
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 12px;
-    color: var(--soft);
+  .kpi-sm { padding:18px 18px 14px; display:flex; flex-direction:column; }
+  .kpi-sm-label  { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
+  .kpi-sm-number { font-size:28px; font-weight:700; letter-spacing:-0.02em; color:var(--dark); line-height:1; margin-bottom:4px; }
+  .kpi-sm-unit   { font-size:13px; font-weight:500; color:var(--muted); }
+  .kpi-sm-sub    { font-size:11px; color:var(--muted); margin-bottom:8px; }
+  .kpi-sm-badge  {
+    display:inline-block; font-size:10px; font-weight:600;
+    padding:2px 8px; border-radius:100px;
+    background:var(--bg); color:var(--muted); margin-bottom:10px; width:fit-content;
   }
-  .stat-card.featured .sc-meta { color: rgba(246,243,237,0.7); }
-  .sc-trend {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 8px;
-    border-radius: 100px;
-    font-weight: 500;
-  }
-  .sc-trend.up { color: #15803d; background: #dcfce7; }
-  .sc-trend.down { color: #b91c1c; background: #fee2e2; }
-  .sc-trend.warn { color: #a16207; background: #fef3c7; }
-  .stat-card.featured .sc-trend.up { background: rgba(34,197,94,0.2); color: #86efac; }
+  .kpi-sm-bar  { height:4px; background:var(--bg); border-radius:100px; overflow:hidden; margin-top:auto; }
+  .kpi-sm-fill { height:100%; border-radius:100px; transition:width 0.6s; }
 
-  .sc-progress {
-    margin-top: 14px;
-    height: 6px;
-    background: var(--bg-2);
-    border-radius: 100px;
-    overflow: hidden;
+  /* ── Section Header ── */
+  .section-header {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:14px;
   }
-  .stat-card.featured .sc-progress { background: rgba(255,255,255,0.1); }
-  .sc-progress > div {
-    height: 100%;
-    border-radius: 100px;
-    background: linear-gradient(90deg, var(--mocha-light), var(--mocha));
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .stat-card.featured .sc-progress > div {
-    background: linear-gradient(90deg, var(--terracotta), var(--gold));
-  }
+  .section-title { font-size:15px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:6px; }
+  .section-icon  { color:var(--muted); font-size:14px; }
+  .section-link  { font-size:12px; color:var(--muted); text-decoration:none; transition:color 0.15s; }
+  .section-link:hover { color:var(--indigo); }
 
-  .ring-vis { position: absolute; top: 22px; right: 20px; width: 72px; height: 72px; }
-  .ring-vis svg { transform: rotate(-90deg); }
-  .ring-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 6; }
-  .ring-fill { fill: none; stroke: var(--terracotta); stroke-width: 6; stroke-linecap: round; }
+  /* ── Work Card Grid ── */
+  .work-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:28px; }
+  .work-card {
+    background:var(--card); border-radius:12px; border:1px solid var(--border);
+    box-shadow:var(--shadow); padding:16px; display:flex; flex-direction:column; gap:8px;
+    transition:box-shadow 0.15s;
+  }
+  .work-card:hover { box-shadow:var(--shadow-md); }
+  .work-card-top { display:flex; justify-content:space-between; align-items:center; }
+  .work-icon {
+    width:32px; height:32px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+  .work-badge {
+    font-size:10px; font-weight:600; padding:2px 8px; border-radius:100px;
+  }
+  .wbadge-good { background:#ECFDF5; color:#059669; }
+  .wbadge-warn { background:#FFFBEB; color:#D97706; }
+  .wbadge-bad  { background:#FEF2F2; color:#DC2626; }
+  .wbadge-done { background:#EEF2FF; color:#4F46E5; }
+  .work-name  { font-size:13px; font-weight:700; color:var(--dark); line-height:1.3; }
+  .work-desc  { font-size:11px; color:var(--muted); line-height:1.4; }
+  .work-tags  { display:flex; gap:5px; flex-wrap:wrap; }
+  .work-tag   { font-size:10px; font-weight:600; padding:2px 7px; border-radius:5px; }
+  .tag-pb      { background:#EEF2FF; color:#4F46E5; }
+  .tag-cb      { background:#F5F3FF; color:#7C3AED; }
+  .tag-default { background:var(--bg); color:var(--muted); }
+  .tag-type    { background:var(--bg); color:var(--muted); }
+  .work-bottom {
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-top:4px;
+  }
+  .work-plan-val { font-size:11px; color:var(--muted); }
+  .work-pct-val  { font-size:20px; font-weight:700; letter-spacing:-0.02em; line-height:1; }
+  .work-bar-track { height:4px; background:var(--bg); border-radius:100px; overflow:hidden; }
+  .work-bar-fill  { height:100%; border-radius:100px; transition:width 0.6s; }
 
-  /* 멘데이(M-day) 미니 스탯 (전체 진행률 카드 내부) */
-  .mday-strip {
-    margin-top: 18px;
-    padding-top: 16px;
-    border-top: 1px dashed rgba(255,255,255,0.15);
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
-    position: relative;
-    z-index: 1;
+  /* ── 추이와 활동 ── */
+  .activity-layout {
+    display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px;
   }
-  .mday-item {
-    padding: 10px 12px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px;
-    transition: background 0.2s;
+  .chart-panel { padding:20px 22px; }
+  .chart-panel-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom:2px; }
+  .chart-panel-sub   { font-size:12px; color:var(--muted); margin-bottom:12px; }
+  .chart-legend {
+    display:flex; gap:14px; font-size:12px; color:var(--muted); margin-bottom:10px;
   }
-  .mday-item:hover { background: rgba(255,255,255,0.10); }
-  .mday-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(246,243,237,0.6);
-    margin-bottom: 6px;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .mday-value {
-    font-family: 'Pretendard Variable', 'Pretendard', sans-serif;
-    font-size: 26px;
-    font-weight: 200;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    color: var(--bg);
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
-  }
-  .mday-unit {
-    font-size: 12px;
-    color: rgba(246,243,237,0.55);
-    font-weight: 400;
-  }
-  .mday-sub {
-    margin-top: 6px;
-    font-size: 11px;
-    color: rgba(246,243,237,0.55);
-  }
+  .legend-item { display:flex; align-items:center; gap:5px; }
+  .legend-dot  { width:8px; height:8px; border-radius:50%; }
+  .chart-wrap  { height:200px; }
 
-  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; }
-  .section-title { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 12px; }
-  .section-title .num {
-    font-family: 'Pretendard Variable', 'Pretendard', sans-serif;
-    font-style: italic;
-    font-weight: 300;
-    font-size: 16px;
-    color: var(--terracotta);
-    border: 1.5px solid var(--terracotta);
-    width: 28px; height: 28px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border-radius: 50%;
-    background: var(--terracotta-bg);
+  .activity-panel { padding:20px 22px; overflow-y:auto; max-height:320px; }
+  .activity-panel-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom:2px; }
+  .activity-panel-sub   { font-size:12px; color:var(--muted); margin-bottom:14px; }
+  .act-item {
+    display:grid; grid-template-columns:40px 1fr auto;
+    gap:10px; padding:9px 6px; border-radius:8px;
+    transition:background 0.12s; align-items:center;
   }
-  .section-action {
-    font-size: 13px; color: var(--soft); cursor: pointer;
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 10px; border-radius: 6px;
+  .act-item:hover { background:var(--bg); }
+  .act-date-col { text-align:center; }
+  .act-day  { font-size:20px; font-weight:700; color:var(--dark); line-height:1; }
+  .act-dow  { font-size:9px; color:var(--lighter); text-transform:uppercase; letter-spacing:0.1em; font-weight:600; margin-top:2px; }
+  .act-body { font-size:12px; }
+  .act-title { font-weight:600; color:var(--text); display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-bottom:2px; }
+  .act-meta  { font-size:11px; color:var(--muted); }
+  .act-badge {
+    font-size:10px; font-weight:600; padding:1px 6px; border-radius:100px;
   }
-  .section-action:hover { background: var(--paper); color: var(--ink); }
+  .act-done   { background:var(--bg); color:var(--lighter); }
+  .act-active { background:var(--indigo-light); color:var(--indigo); }
+  .act-qty-col { text-align:right; }
+  .act-qty      { font-size:20px; font-weight:700; color:#FF6B35; line-height:1; }
+  .act-qty-unit { font-size:9px; color:var(--lighter); text-transform:uppercase; letter-spacing:0.08em; margin-top:2px; }
+  .act-empty { padding:20px; text-align:center; color:var(--muted); font-size:13px; }
 
-  .work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 40px; }
-  .wcard {
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 24px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex; flex-direction: column;
-    position: relative;
-    overflow: hidden;
-  }
-  .wcard:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--line-strong); }
-  .wcard-status { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-  .wcard-status.good { background: linear-gradient(90deg, var(--sage), #6b8e58); }
-  .wcard-status.warn { background: linear-gradient(90deg, var(--gold), #d97706); }
-  .wcard-status.bad  { background: linear-gradient(90deg, var(--terracotta), #9a2e08); }
-
-  .wcard-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-  .wcard-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-  .wcard-icon.good { background: var(--sage-bg); }
-  .wcard-icon.warn { background: var(--gold-bg); }
-  .wcard-icon.bad  { background: var(--terracotta-bg); }
-
-  .wcard-status-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px;
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 500;
-  }
-  .wcard-status-badge.good { background: var(--sage-bg); color: var(--olive); }
-  .wcard-status-badge.warn { background: var(--gold-bg); color: var(--mocha); }
-  .wcard-status-badge.bad  { background: var(--terracotta-bg); color: var(--terracotta); }
-  .wcard-status-badge .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-
-  .wcard-title { font-size: 16px; font-weight: 600; line-height: 1.3; margin-bottom: 6px; letter-spacing: -0.01em; }
-  .wcard-subtitle { font-size: 12px; color: var(--soft); margin-bottom: 16px; }
-  .wcard-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 16px; }
-  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-  .tag.mocha   { background: var(--mocha-bg);   color: var(--mocha); }
-  .tag.sage    { background: var(--sage-bg);    color: var(--olive); }
-  .tag.terra   { background: var(--terracotta-bg); color: var(--terracotta); }
-  .tag.plum    { background: var(--plum-bg);    color: var(--plum); }
-  .tag.slate   { background: var(--slate-bg);   color: var(--slate); }
-  .tag.gold    { background: var(--gold-bg);    color: var(--mocha); }
-
-  .wcard-progress { margin-top: auto; padding-top: 16px; border-top: 1px dashed var(--line); }
-  .wcard-pp { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-  .wcard-pp-label { font-size: 12px; color: var(--soft); }
-  .wcard-pp-value {
-    font-family: 'Pretendard Variable', 'Pretendard', sans-serif;
-    font-size: 32px;
-    font-weight: 200;
-    letter-spacing: -0.03em;
-    line-height: 1;
-  }
-  .wcard-pp-value .unit { font-size: 14px; color: var(--soft); }
-  .wcard-bar { height: 5px; background: var(--bg-2); border-radius: 100px; overflow: hidden; }
-  .wcard-bar > div { height: 100%; border-radius: 100px; transition: width 0.8s; }
-  .wcard-bar > div.good { background: linear-gradient(90deg, var(--sage), #6b8e58); }
-  .wcard-bar > div.warn { background: linear-gradient(90deg, var(--gold-bg), var(--gold)); }
-  .wcard-bar > div.bad  { background: linear-gradient(90deg, var(--terracotta-bg), var(--terracotta)); }
-
-  .panels-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; margin-bottom: 40px; }
-  .panel {
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 28px;
-    box-shadow: var(--shadow-soft);
-  }
-  .panel-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
-  .panel-title { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
-  .panel-sub { font-size: 12px; color: var(--soft); margin-bottom: 24px; }
-  .chart-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; font-size: 12px; color: var(--soft); }
-  .legend-item { display: flex; align-items: center; gap: 6px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
-  .chart-wrap { position: relative; height: 320px; }
-
-  .activity { display: flex; flex-direction: column; gap: 2px; }
-  .activity-item {
-    display: grid; grid-template-columns: auto 1fr auto; gap: 14px;
-    padding: 14px 12px; border-radius: 10px;
-    transition: background 0.15s; cursor: pointer; align-items: center;
-  }
-  .activity-item:hover { background: var(--bg-2); }
-  .activity-date {
-    font-family: 'Pretendard Variable', 'Pretendard', sans-serif;
-    font-size: 26px; font-weight: 200;
-    letter-spacing: -0.03em; line-height: 1;
-    color: var(--ink); text-align: center; min-width: 44px;
-  }
-  .activity-date small {
-    display: block; font-family: 'Pretendard Variable', sans-serif;
-    font-size: 10px; color: var(--softer);
-    text-transform: uppercase; letter-spacing: 0.1em;
-    margin-top: 4px; font-style: normal; font-weight: 500;
-  }
-  .activity-content { font-size: 13px; line-height: 1.5; }
-  .activity-content .title { font-weight: 600; color: var(--ink); margin-bottom: 2px; display: flex; gap: 6px; align-items: center; }
-  .activity-content .meta { color: var(--soft); font-size: 12px; }
-  .activity-qty {
-    text-align: right;
-    font-family: 'Pretendard Variable', 'Pretendard', sans-serif;
-    font-size: 30px; font-weight: 200;
-    letter-spacing: -0.03em; line-height: 1;
-    color: var(--terracotta);
-  }
-  .activity-qty small {
-    display: block; font-family: 'Pretendard Variable', sans-serif;
-    font-size: 10px; color: var(--softer);
-    margin-top: 2px; text-transform: uppercase; letter-spacing: 0.1em;
-  }
-
+  /* ── Footer ── */
   footer {
-    margin-top: 60px; padding: 24px 0;
-    text-align: center; color: var(--softer); font-size: 12px;
-    border-top: 1px dashed var(--line);
-    display: flex; justify-content: space-between; align-items: center;
+    padding:10px 24px; border-top:1px solid var(--border); background:var(--card);
+    font-size:11px; color:var(--lighter);
+    display:flex; justify-content:space-between; flex-shrink:0;
   }
 
-  @media (max-width: 1200px) {
-    .hero-stats { grid-template-columns: 1fr 1fr 1fr; }
+  /* ── Dark Theme ── */
+  body.dark {
+    --indigo:       #818CF8;
+    --indigo-light: rgba(99,102,241,0.15);
+    --green:        #34D399;
+    --green-light:  rgba(52,211,153,0.12);
+    --dark:         #F9FAFB;
+    --text:         #F4F4F5;
+    --text-2:       #D4D4D8;
+    --muted:        #A1A1AA;
+    --lighter:      #71717A;
+    --bg:           #09090B;
+    --card:         #18181B;
+    --border:       #27272A;
+    --border-2:     #3F3F46;
+    --shadow:       0 1px 3px rgba(0,0,0,0.4);
+    --shadow-md:    0 4px 6px rgba(0,0,0,0.4);
   }
-  @media (max-width: 800px) {
-    .hero-stats { grid-template-columns: 1fr 1fr; }
-    .panels-grid { grid-template-columns: 1fr; }
+
+  /* ── Responsive ── */
+  @media (max-width:1280px) {
+    .kpi-5 { grid-template-columns:1fr 1fr 1fr; }
+    .kpi-hero { grid-column:1/-1; }
+    .work-grid { grid-template-columns:repeat(3,1fr); }
+    .activity-layout { grid-template-columns:1fr; }
+  }
+  @media (max-width:960px) {
+    :root { --sidebar-w:0px; }
+    .sidebar { display:none; }
+    .work-grid { grid-template-columns:repeat(2,1fr); }
+    .kpi-5 { grid-template-columns:1fr 1fr; }
   }
 </style>
 </head>
 <body>
-<div class="page">
+<div class="app">
 
-<header>
-  <div>
-    <div class="breadcrumb">
-      <a href="#">🏗️ HCNS Service</a>
-      <span class="sep">/</span>
-      <a href="#">CBS Improvement</a>
-      <span class="sep">/</span>
-      <span class="current">SIH2FC</span>
-    </div>
-    <h1><span class="label">전체 진행률</span> <span class="accent">0.0%</span></h1>
-    <div class="meta-pills">
-      <span class="meta-pill live"><span class="dot"></span>실시간 동기화</span>
-      <span class="meta-pill"><span class="dot"></span>마지막 업데이트 14:29</span>
-      <span class="meta-pill">📋 작업 항목 4개</span>
-    </div>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="HCNS SERVICE" style="height:48px; width:auto; object-fit:contain;">
   </div>
-  <button class="refresh-btn" onclick="location.reload()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-    새로고침
-  </button>
-</header>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">현장 목록</div>
+    <a class="nav-item active" href="dashboard_SIH2FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">SIH2FC</span><span class="nav-badge">0%</span></a>
+<a class="nav-item" href="dashboard_CHW1FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">CHW1FC</span><span class="nav-badge">46%</span></a>
+<a class="nav-item" href="dashboard_ECH2FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">ECH2FC</span><span class="nav-badge">5%</span></a>
+<a class="nav-item" href="dashboard_CHW2FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">CHW2FC</span><span class="nav-badge">0%</span></a>
+<a class="nav-item" href="dashboard_DON1FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">DON1FC</span><span class="nav-badge">0%</span></a>
+<a class="nav-item" href="dashboard_MCN1FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">MCN1FC</span><span class="nav-badge">0%</span></a>
+<a class="nav-item" href="dashboard_etc.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">기타</span><span class="nav-badge">0%</span></a>
 
-<div class="tabs-wrap"><a class="tab active" href="dashboard_SIH2FC.html">🏗️ SIH2FC <span class="count">0</span></a><a class="tab" href="dashboard_CHW1FC.html">🏗️ CHW1FC <span class="count">3</span></a><a class="tab" href="dashboard_ECH2FC.html">🏗️ ECH2FC <span class="count">3</span></a><a class="tab" href="dashboard_CHW2FC.html">🏗️ CHW2FC <span class="count">0</span></a><a class="tab" href="dashboard_DON1FC.html">🏗️ DON1FC <span class="count">0</span></a><a class="tab" href="dashboard_MCN1FC.html">🏗️ MCN1FC <span class="count">0</span></a><a class="tab" href="dashboard_etc.html">🏗️ 기타 <span class="count">0</span></a></div>
-
-
-<div class="hero-stats">
-  <div class="stat-card featured">
-    <div class="sc-label">📊 전체 진행률</div>
-    <div class="sc-value">0<span class="unit">/ 670 sets</span></div>
-    <div class="ring-vis">
-      <svg width="80" height="80">
-        <circle class="ring-bg" cx="40" cy="40" r="34"></circle>
-        <circle class="ring-fill" cx="40" cy="40" r="34"
-          stroke-dasharray="213.6" stroke-dashoffset="213.6"></circle>
-      </svg>
-      <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Pretendard Variable', sans-serif; font-weight:200; font-size:22px; letter-spacing:-0.03em;">0%</div>
-    </div>
-    <div class="sc-meta">
-      <span>완료까지 670 sets</span>
-      <span class="sc-trend up">진행 중</span>
-    </div>
-    <div class="sc-progress"><div style="width:0.0%"></div></div>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="nav-item" href="#" onclick="location.reload(); return false;">
+      <span class="nav-icon">↻</span>
+      <span class="nav-label">새로고침</span>
+    </a>
   </div>
+</aside>
 
-  <div class="stat-card">
-    <div class="sc-label">📅 작업 일수</div>
-    <div class="sc-value">0<span class="unit">일</span></div>
-    <div class="sc-meta">
-      <span>실제 작업 진행일</span>
-      <span class="sc-trend up">기록됨</span>
+<div class="main-wrap">
+  <header class="topbar">
+    <div style="font-size:14px; font-weight:600; color:var(--muted);">CBS Improvement Project</div>
+    <div class="topbar-right">
+      <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="테마 전환">
+        <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <div class="topbar-badge"><span class="live-dot"></span>실시간 동기화</div>
+      <span class="topbar-time">업데이트 15:29</span>
     </div>
-    <div class="sc-progress"><div style="width:0%; background: linear-gradient(90deg, var(--sage), #6b8e58);"></div></div>
-  </div>
+  </header>
 
-  <div class="stat-card">
-    <div class="sc-label">📋 총 계획 M-day</div>
-    <div class="sc-value">-<span class="unit">md</span></div>
-    <div class="sc-meta">
-      <span>config.py에 입력</span>
-      <span class="sc-trend warn">계획</span>
-    </div>
-    <div class="sc-progress"><div style="width:100%; background: linear-gradient(90deg, var(--slate-bg), var(--slate));"></div></div>
-  </div>
+  <div class="content-scroll">
 
-  <div class="stat-card">
-    <div class="sc-label">📈 누적 사용 M-day</div>
-    <div class="sc-value">-<span class="unit">md</span></div>
-    <div class="sc-meta">
-      <span>사용률 —</span>
-      <span class="sc-trend up">누적</span>
+    <div class="page-header">
+      <div>
+        <div class="page-title">전체 진행률 <span class="pct-highlight">0.0%</span></div>
+        <div class="page-meta">
+          <span><span class="live-dot" style="display:inline-block;"></span> 실시간 동기화</span>
+          <span>● 마지막 업데이트 15:29</span>
+          <span>📋 작업 항목 4개</span>
+        </div>
+      </div>
+      <a class="refresh-btn" href="#" onclick="location.reload(); return false;">↻ 새로고침</a>
     </div>
-    <div class="sc-progress"><div style="width:0.0%; background: linear-gradient(90deg, var(--plum), #4a3450);"></div></div>
+
+    
+<div class="kpi-5">
+  <div class="card kpi-hero">
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-label">전체 진행률</div>
+        <div class="hero-number">0<span class="hero-unit"> / 670 sets</span></div>
+        <div class="hero-sub">전달까지 670 sets</div>
+        <span class="hero-badge-bad">지연</span>
+      </div>
+      <div class="hero-ring-wrap">
+        <div class="hero-ring" style="background:conic-gradient(#FF6B35 0.0%, rgba(255,255,255,0.12) 0.0%);">
+          <div class="hero-ring-inner"><span class="hero-pct">0%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-bar-track"><div class="hero-bar-fill" style="width:0.0%;"></div></div>
   </div>
 
-  <div class="stat-card">
-    <div class="sc-label">⏱️ 금일 사용 M-day</div>
-    <div class="sc-value">-<span class="unit">md</span></div>
-    <div class="sc-meta">
-      <span>오늘 투입 인원</span>
-      <span class="sc-trend up">오늘</span>
-    </div>
-    <div class="sc-progress"><div style="width:0%; background: linear-gradient(90deg, var(--gold-bg), var(--gold));"></div></div>
+  <div class="card kpi-sm">
+    <div class="kpi-sm-label">작업 일수</div>
+    <div class="kpi-sm-number">0<span class="kpi-sm-unit"> 일</span></div>
+    <div class="kpi-sm-sub">실제 작업 진행일</div>
+    <span class="kpi-sm-badge">기록됨</span>
+    <div class="kpi-sm-bar"><div class="kpi-sm-fill" style="width:0%; background:var(--indigo);"></div></div>
+  </div>
+
+  <div class="card kpi-sm">
+    <div class="kpi-sm-label">총 계획 M-DAY</div>
+    <div class="kpi-sm-number">-<span class="kpi-sm-unit"> md</span></div>
+    <div class="kpi-sm-sub">config.py에 입력</div>
+    <span class="kpi-sm-badge">계획</span>
+    <div class="kpi-sm-bar"><div class="kpi-sm-fill" style="width:100%; background:var(--border-2);"></div></div>
+  </div>
+
+  <div class="card kpi-sm">
+    <div class="kpi-sm-label">누적 사용 M-DAY</div>
+    <div class="kpi-sm-number">-<span class="kpi-sm-unit"> md</span></div>
+    <div class="kpi-sm-sub">사용률 —</div>
+    <span class="kpi-sm-badge">누적</span>
+    <div class="kpi-sm-bar"><div class="kpi-sm-fill" style="width:0%; background:var(--indigo);"></div></div>
+  </div>
+
+  <div class="card kpi-sm">
+    <div class="kpi-sm-label">금일 사용 M-DAY</div>
+    <div class="kpi-sm-number">-<span class="kpi-sm-unit"> md</span></div>
+    <div class="kpi-sm-sub">오늘 투입 인원</div>
+    <span class="kpi-sm-badge">오늘</span>
+    <div class="kpi-sm-bar"><div class="kpi-sm-fill" style="width:0%; background:var(--green);"></div></div>
   </div>
 </div>
 
-
-<div class="section-head">
-  <h2 class="section-title">
-    <span class="num">i</span>
-    공종별 진행 현황
-  </h2>
-  <div class="section-action">↻ 전체 보기</div>
+    
+<div class="section-header">
+  <div class="section-title"><span class="section-icon">ⓘ</span> 공종별 진행 현황</div>
+  <a class="section-link" href="#" onclick="return false;">↻ 전체 보기</a>
 </div>
-
 <div class="work-grid">
-  <div class="wcard">
-    <div class="wcard-status bad"></div>
-    <div class="wcard-head">
-      <div class="wcard-icon bad">🔨</div>
-      <div class="wcard-status-badge bad"><span class="dot"></span>지연</div>
+  <div class="work-card">
+    <div class="work-card-top">
+      <div class="work-icon" style="background:#4F46E518; color:#4F46E5;">🔨</div>
+      <span class="work-badge wbadge-bad">지연</span>
     </div>
-    <div class="wcard-title">PB Gap guarding</div>
-    <div class="wcard-subtitle">PB Gap guarding Installation</div>
-    <div class="wcard-tags">
-      <span class="tag mocha">PB</span><span class="tag sage">Gap guarding</span>
+    <div class="work-name">PB Gap guarding</div>
+    <div class="work-desc">PB Gap guarding Installation</div>
+    <div class="work-tags">
+      <span class="work-tag tag-pb">PB</span>
+      <span class="work-tag tag-type">Gap guarding</span>
     </div>
-    <div class="wcard-progress">
-      <div class="wcard-pp">
-        <span class="wcard-pp-label">0 / 384 sets</span>
-        <span class="wcard-pp-value">0.0<span class="unit">%</span></span>
-      </div>
-      <div class="wcard-bar"><div class="bad" style="width:0.0%"></div></div>
+    <div class="work-bottom">
+      <span class="work-plan-val">0 / 384 sets</span>
+      <span class="work-pct-val" style="color:#EF4444;">0.0%</span>
     </div>
+    <div class="work-bar-track"><div class="work-bar-fill" style="width:0.0%; background:#EF4444;"></div></div>
   </div>
-
-  <div class="wcard">
-    <div class="wcard-status bad"></div>
-    <div class="wcard-head">
-      <div class="wcard-icon bad">🔨</div>
-      <div class="wcard-status-badge bad"><span class="dot"></span>지연</div>
+  <div class="work-card">
+    <div class="work-card-top">
+      <div class="work-icon" style="background:#4F46E518; color:#4F46E5;">🔨</div>
+      <span class="work-badge wbadge-bad">지연</span>
     </div>
-    <div class="wcard-title">CB Gap guarding</div>
-    <div class="wcard-subtitle">CB Gap guarding Installation</div>
-    <div class="wcard-tags">
-      <span class="tag plum">CB</span><span class="tag sage">Gap guarding</span>
+    <div class="work-name">CB Gap guarding</div>
+    <div class="work-desc">CB Gap guarding Installation</div>
+    <div class="work-tags">
+      <span class="work-tag tag-cb">CB</span>
+      <span class="work-tag tag-type">Gap guarding</span>
     </div>
-    <div class="wcard-progress">
-      <div class="wcard-pp">
-        <span class="wcard-pp-label">0 / 248 sets</span>
-        <span class="wcard-pp-value">0.0<span class="unit">%</span></span>
-      </div>
-      <div class="wcard-bar"><div class="bad" style="width:0.0%"></div></div>
+    <div class="work-bottom">
+      <span class="work-plan-val">0 / 248 sets</span>
+      <span class="work-pct-val" style="color:#EF4444;">0.0%</span>
     </div>
+    <div class="work-bar-track"><div class="work-bar-fill" style="width:0.0%; background:#EF4444;"></div></div>
   </div>
-
-  <div class="wcard">
-    <div class="wcard-status bad"></div>
-    <div class="wcard-head">
-      <div class="wcard-icon bad">🛡️</div>
-      <div class="wcard-status-badge bad"><span class="dot"></span>지연</div>
+  <div class="work-card">
+    <div class="work-card-top">
+      <div class="work-icon" style="background:#10B98118; color:#10B981;">🛡️</div>
+      <span class="work-badge wbadge-bad">지연</span>
     </div>
-    <div class="wcard-title">CB Cover</div>
-    <div class="wcard-subtitle">CB Cover Installation</div>
-    <div class="wcard-tags">
-      <span class="tag plum">CB</span><span class="tag mocha">Cover</span>
+    <div class="work-name">CB Cover</div>
+    <div class="work-desc">CB Cover Installation</div>
+    <div class="work-tags">
+      <span class="work-tag tag-cb">CB</span>
+      <span class="work-tag tag-type">Cover</span>
     </div>
-    <div class="wcard-progress">
-      <div class="wcard-pp">
-        <span class="wcard-pp-label">0 / 38 sets</span>
-        <span class="wcard-pp-value">0.0<span class="unit">%</span></span>
-      </div>
-      <div class="wcard-bar"><div class="bad" style="width:0.0%"></div></div>
+    <div class="work-bottom">
+      <span class="work-plan-val">0 / 38 sets</span>
+      <span class="work-pct-val" style="color:#EF4444;">0.0%</span>
     </div>
+    <div class="work-bar-track"><div class="work-bar-fill" style="width:0.0%; background:#EF4444;"></div></div>
   </div>
-
-  <div class="wcard">
-    <div class="wcard-status warn"></div>
-    <div class="wcard-head">
-      <div class="wcard-icon warn">📐</div>
-      <div class="wcard-status-badge warn"><span class="dot"></span>점검 필요</div>
+  <div class="work-card">
+    <div class="work-card-top">
+      <div class="work-icon" style="background:#8B5CF618; color:#8B5CF6;">📐</div>
+      <span class="work-badge wbadge-warn">점검 필요</span>
     </div>
-    <div class="wcard-title">CB Gap Plate</div>
-    <div class="wcard-subtitle">CB Gap Plate Installation</div>
-    <div class="wcard-tags">
-      <span class="tag plum">CB</span><span class="tag plum">Gap Plate</span>
+    <div class="work-name">CB Gap Plate</div>
+    <div class="work-desc">CB Gap Plate Installation</div>
+    <div class="work-tags">
+      <span class="work-tag tag-cb">CB</span>
+      <span class="work-tag tag-type">Gap Plate</span>
     </div>
-    <div class="wcard-progress">
-      <div class="wcard-pp">
-        <span class="wcard-pp-label">계획 미설정</span>
-        <span class="wcard-pp-value">0.0<span class="unit">%</span></span>
-      </div>
-      <div class="wcard-bar"><div class="warn" style="width:0.0%"></div></div>
+    <div class="work-bottom">
+      <span class="work-plan-val">0 / 0 ea</span>
+      <span class="work-pct-val" style="color:#EF4444;">0.0%</span>
     </div>
+    <div class="work-bar-track"><div class="work-bar-fill" style="width:0.0%; background:#EF4444;"></div></div>
   </div></div>
 
-<div class="section-head">
-  <h2 class="section-title">
-    <span class="num">ii</span>
-    추이와 활동
-  </h2>
-</div>
-
-<div class="panels-grid">
-  <div class="panel">
-    <div class="panel-head">
-      <div>
-        <div class="panel-title">📈 일별 작업량</div>
-        <div class="panel-sub">전체 기간 일별 설치량</div>
+    <div class="section-header">
+      <div class="section-title"><span class="section-icon">ⓘ</span> 추이와 활동</div>
+    </div>
+    <div class="activity-layout">
+      <div class="card chart-panel">
+        <div class="chart-panel-title">📈 일별 작업량</div>
+        <div class="chart-panel-sub">전체 기간 일별 설치량</div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:var(--indigo);"></span>일별 작업량</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#D1D5DB;"></span>이동 평균 (5일)</span>
+        </div>
+        <div class="chart-wrap"><canvas id="trend"></canvas></div>
+      </div>
+      <div class="card activity-panel">
+        <div class="activity-panel-title">📋 최근 작업</div>
+        <div class="activity-panel-sub">트래킹 시트 자동 기록</div>
+        <div class="act-empty">최근 작업 기록 없음</div>
       </div>
     </div>
-    <div class="chart-legend">
-      <span class="legend-item"><span class="legend-dot" style="background:var(--terracotta);"></span>일별 작업량</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--mocha-light); opacity:0.4;"></span>이동 평균 (5일)</span>
-    </div>
-    <div class="chart-wrap"><canvas id="trend"></canvas></div>
+
   </div>
 
-  <div class="panel">
-    <div class="panel-head">
-      <div>
-        <div class="panel-title">📅 최근 작업</div>
-        <div class="panel-sub">트래킹 시트 자동 기록</div>
-      </div>
-    </div>
-    <div class="activity">
-      <div class="activity-item">
-        <div class="activity-date">30<small>THU</small></div>
-        <div class="activity-content">
-          <div class="title">PB#01 Gap guarding <span class="tag slate" style="font-size:10px;">Done</span></div>
-          <div class="meta">CHW1FC · 기록 완료</div>
-        </div>
-        <div class="activity-qty">24<small>sets</small></div>
-      </div>
-
-      <div class="activity-item">
-        <div class="activity-date">30<small>THU</small></div>
-        <div class="activity-content">
-          <div class="title">PB#02 Gap guarding <span class="tag slate" style="font-size:10px;">Done</span></div>
-          <div class="meta">CHW1FC · 기록 완료</div>
-        </div>
-        <div class="activity-qty">44<small>sets</small></div>
-      </div>
-
-      <div class="activity-item">
-        <div class="activity-date">30<small>THU</small></div>
-        <div class="activity-content">
-          <div class="title">CB Gap guarding <span class="tag slate" style="font-size:10px;">Done</span></div>
-          <div class="meta">CHW1FC · 기록 완료</div>
-        </div>
-        <div class="activity-qty">18<small>sets</small></div>
-      </div>
-
-      <div class="activity-item">
-        <div class="activity-date">30<small>THU</small></div>
-        <div class="activity-content">
-          <div class="title">PB#01 Cable <span class="tag slate" style="font-size:10px;">Done</span></div>
-          <div class="meta">ECH2FC · 기록 완료</div>
-        </div>
-        <div class="activity-qty">1<small>ea</small></div>
-      </div>
-
-      <div class="activity-item">
-        <div class="activity-date">29<small>WED</small></div>
-        <div class="activity-content">
-          <div class="title">PB#01 Gap guarding <span class="tag slate" style="font-size:10px;">Done</span></div>
-          <div class="meta">CHW1FC · 기록 완료</div>
-        </div>
-        <div class="activity-qty">50<small>sets</small></div>
-      </div>
-
-      <div class="activity-item">
-        <div class="activity-date">29<small>WED</small></div>
-        <div class="activity-content">
-          <div class="title">CB Gap guarding <span class="tag slate" style="font-size:10px;">Done</span></div>
-          <div class="meta">CHW1FC · 기록 완료</div>
-        </div>
-        <div class="activity-qty">40<small>sets</small></div>
-      </div>
-
-      <div class="activity-item">
-        <div class="activity-date">29<small>WED</small></div>
-        <div class="activity-content">
-          <div class="title">PB#01 Gap guarding <span class="tag slate" style="font-size:10px;">Done</span></div>
-          <div class="meta">ECH2FC · 기록 완료</div>
-        </div>
-        <div class="activity-qty">1<small>sets</small></div>
-      </div>
-
-      <div class="activity-item">
-        <div class="activity-date">29<small>WED</small></div>
-        <div class="activity-content">
-          <div class="title">PB#02 Gap guarding <span class="tag slate" style="font-size:10px;">Done</span></div>
-          <div class="meta">ECH2FC · 기록 완료</div>
-        </div>
-        <div class="activity-qty">3<small>sets</small></div>
-      </div></div>
-  </div>
+  <footer>
+    <div>HCNS Service · CBS Improvement Project · SIH2FC</div>
+    <div>2026-05-14 15:29</div>
+  </footer>
 </div>
-
-<footer>
-  <div>HCNS Service · CBS Improvement Project</div>
-  <div class="mono">자동 갱신됨 · 2026-05-14 14:29</div>
-</footer>
-
 </div>
 
 <script>
-Chart.defaults.font.family = "'Pretendard Variable', 'Pretendard', sans-serif";
-Chart.defaults.color = '#6b665d';
+const SUN_ICON  = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 
-const data = [4.0, 39.0, 76.0, 61.0, 37.0, 37.0, 133.0, 95.0, 87.0];
-const labels = ["4/9", "4/21", "4/22", "4/23", "4/24", "4/25", "4/28", "4/29", "4/30"];
+function applyTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  document.getElementById('themeBtn').innerHTML = dark ? SUN_ICON : MOON_ICON;
+}
+function toggleTheme() {
+  const isDark = !document.body.classList.contains('dark');
+  localStorage.setItem('hcns-theme', isDark ? 'dark' : 'light');
+  applyTheme(isDark);
+}
+(function() { if (localStorage.getItem('hcns-theme') === 'dark') applyTheme(true); })();
 
-// 5-day moving average
-const movingAvg = data.map((_, i) => {
-  const start = Math.max(0, i - 4);
-  const slice = data.slice(start, i + 1);
-  return slice.reduce((a, b) => a + b, 0) / slice.length;
+Chart.defaults.font.family = "'Pretendard', sans-serif";
+Chart.defaults.color = '#9CA3AF';
+
+const trendData   = [4.0, 39.0, 76.0, 61.0, 37.0, 37.0, 133.0, 95.0, 87.0];
+const trendLabels = ["4/9", "4/21", "4/22", "4/23", "4/24", "4/25", "4/28", "4/29", "4/30"];
+const movingAvg   = trendData.map((_, i) => {
+  const s = trendData.slice(Math.max(0, i-4), i+1);
+  return s.reduce((a,b) => a+b, 0) / s.length;
 });
 
-const ctx = document.getElementById('trend').getContext('2d');
-const grad = ctx.createLinearGradient(0, 0, 0, 320);
-grad.addColorStop(0, 'rgba(194,65,12,0.25)');
-grad.addColorStop(1, 'rgba(194,65,12,0.0)');
+const tCtx = document.getElementById('trend').getContext('2d');
+const grad = tCtx.createLinearGradient(0, 0, 0, 200);
+grad.addColorStop(0, 'rgba(79,70,229,0.18)');
+grad.addColorStop(1, 'rgba(79,70,229,0.0)');
 
-new Chart(ctx, {
+new Chart(tCtx, {
   type: 'line',
   data: {
-    labels,
+    labels: trendLabels,
     datasets: [
-      {
-        label: '이동 평균 (5일)',
-        data: movingAvg,
-        borderColor: '#b08968',
-        borderDash: [5, 5],
-        borderWidth: 1.5,
-        pointRadius: 0,
-        tension: 0.4,
-        fill: false,
-      },
-      {
-        label: '일별 작업량',
-        data,
-        borderColor: '#c2410c',
-        backgroundColor: grad,
-        fill: true,
-        tension: 0.4,
-        borderWidth: 2.5,
-        pointRadius: 4,
-        pointBackgroundColor: '#fff',
-        pointBorderColor: '#c2410c',
-        pointBorderWidth: 2,
-        pointHoverRadius: 7,
-        pointHoverBorderWidth: 3,
-      }
+      { label:'이동 평균', data:movingAvg, borderColor:'#D1D5DB', borderDash:[4,4], borderWidth:1.5, pointRadius:0, tension:0.4, fill:false },
+      { label:'일별 작업량', data:trendData, borderColor:'#4F46E5', backgroundColor:grad, fill:true, tension:0.4, borderWidth:2.5, pointRadius:3, pointBackgroundColor:'#fff', pointBorderColor:'#4F46E5', pointBorderWidth:2, pointHoverRadius:6 }
     ]
   },
   options: {
-    responsive: true, maintainAspectRatio: false,
+    responsive:true, maintainAspectRatio:false,
     plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#1f1d1a',
-        titleColor: '#fff',
-        bodyColor: '#e6dfd1',
-        padding: 12,
-        cornerRadius: 8,
-        titleFont: { weight: '600', size: 12 },
-        bodyFont: { size: 12 },
-        displayColors: false,
-        callbacks: {
-          label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}`
-        }
-      }
+      legend: { display:false },
+      tooltip: { backgroundColor:'#111827', titleColor:'#fff', bodyColor:'#D1D5DB', padding:10, cornerRadius:8, displayColors:false }
     },
     scales: {
-      y: {
-        grid: { color: '#ececec', drawTicks: false },
-        ticks: { padding: 8, font: { size: 11 } },
-        beginAtZero: true,
-        border: { display: false },
-      },
-      x: {
-        grid: { display: false },
-        ticks: { font: { size: 11 } },
-        border: { color: '#d8d8d8' },
-      }
+      y: { grid:{ color:'#F3F4F6' }, ticks:{ padding:8, font:{ size:11 } }, beginAtZero:true, border:{ display:false } },
+      x: { grid:{ display:false }, ticks:{ font:{ size:11 } }, border:{ color:'#E5E7EB' } }
     },
-    interaction: { mode: 'index', intersect: false },
+    interaction: { mode:'index', intersect:false }
   }
 });
 </script>
-
 </body>
 </html>
