@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>메일 로그 대시보드</title>
+<style>
+  body { font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; margin:0; padding:24px; background:#f4f6fa; color:#1d2433; }
+  h1 { margin:0 0 4px; }
+  .meta { color:#6b7280; font-size:13px; margin-bottom:24px; }
+  .grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:24px; }
+  .card { background:white; border-radius:10px; padding:16px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .card .label { font-size:12px; color:#6b7280; margin-bottom:6px; }
+  .card .value { font-size:28px; font-weight:700; color:#1f2937; }
+  .card.urgent .value { color:#dc2626; }
+  .card.review .value { color:#d97706; }
+  .card.money .value { font-size:22px; }
+  .panels { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:24px; }
+  .panel { background:white; border-radius:10px; padding:14px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .panel h3 { margin:0 0 10px; font-size:14px; color:#374151; }
+  .panel ul { list-style:none; padding:0; margin:0; }
+  .panel li { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #f3f4f6; font-size:13px; }
+  .panel li:last-child { border-bottom:none; }
+  .panel li.empty { color:#9ca3af; font-style:italic; }
+  table { width:100%; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  th, td { padding:9px 12px; text-align:left; font-size:13px; border-bottom:1px solid #f3f4f6; }
+  th { background:#305496; color:white; font-weight:600; }
+  tr.row-review td { background:#fff7ed; }
+  tr.row-urgent td { background:#fef2f2; }
+  .section-title { font-size:14px; font-weight:600; color:#374151; margin:0 0 10px; }
+</style>
+</head>
+<body>
+  <h1>📧 메일 로그 대시보드</h1>
+  <div class="meta">최종 갱신: 2026-05-14 11:23:02 · 누적 0건</div>
+
+  <div class="grid">
+    <div class="card"><div class="label">최근 7일 신규</div><div class="value">0건</div></div>
+    <div class="card urgent"><div class="label">긴급+높음 우선순위</div><div class="value">0건</div></div>
+    <div class="card review"><div class="label">검토필요</div><div class="value">0건</div></div>
+    <div class="card urgent"><div class="label">마감일 임박(≤7일)</div><div class="value">0건</div></div>
+    <div class="card money"><div class="label">금액 합계 (전체)</div><div class="value">0원</div></div>
+    <div class="card money"><div class="label">금액 합계 (최근 7일)</div><div class="value">0원</div></div>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <h3>업무 유형별</h3>
+      <ul><li><span>견적</span><b>0</b></li><li><span>주문</span><b>0</b></li><li><span>계약</span><b>0</b></li><li><span>정산</span><b>0</b></li><li><span>CS</span><b>0</b></li><li><span>일정</span><b>0</b></li><li><span>보고</span><b>0</b></li><li><span>기타</span><b>0</b></li></ul>
+    </div>
+    <div class="panel">
+      <h3>우선순위별</h3>
+      <ul><li><span>긴급</span><b>0</b></li><li><span>높음</span><b>0</b></li><li><span>보통</span><b>0</b></li><li><span>낮음</span><b>0</b></li></ul>
+    </div>
+    <div class="panel">
+      <h3>고객사 TOP 10</h3>
+      <ul><li class="empty">데이터 없음</li></ul>
+    </div>
+  </div>
+
+  <div class="section-title">최근 메일 20건</div>
+  <table>
+    <thead><tr>
+      <th>수신일시</th><th>회사명</th><th>업무유형</th><th>제목</th>
+      <th>우선순위</th><th>상태</th><th>금액</th><th>납기일</th><th>담당자</th>
+    </tr></thead>
+    <tbody><tr><td colspan="9" style="text-align:center;color:#9ca3af;padding:20px">데이터 없음</td></tr></tbody>
+  </table>
+</body>
+</html>
