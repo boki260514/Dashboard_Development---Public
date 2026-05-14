@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HCNS 대시보드 · 로그인</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      background: #F3F4F6;
+      color: #111827;
+      -webkit-font-smoothing: antialiased;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 400px;
+      padding: 48px 40px;
+      background: #ffffff;
+      border: 1px solid #E5E7EB;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    .login-logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .login-logo img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .login-title {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+    .login-sub {
+      text-align: center;
+      font-size: 13px;
+      color: #9CA3AF;
+      margin-bottom: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 7px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      border-radius: 9px;
+      color: #111827;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .form-input::placeholder { color: #D1D5DB; }
+    .form-input:focus {
+      border-color: #4F46E5;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+    }
+
+    .error-msg {
+      display: none;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #DC2626;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .error-msg.show { display: block; }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: #4F46E5;
+      border: none;
+      border-radius: 9px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+      margin-top: 6px;
+    }
+    .btn-login:hover {
+      background: #4338CA;
+      box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+    }
+    .btn-login:active { transform: scale(0.99); }
+
+    .login-footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #D1D5DB;
+    }
+  </style>
+</head>
+<body>
+<div class="login-box">
+  <div class="login-logo">
+    <img src="logo.png" alt="HCNS SERVICE">
+  </div>
+  <div class="login-title">CBS 개선 프로젝트</div>
+  <div class="login-sub">계속하려면 로그인하세요</div>
+
+  <div class="error-msg" id="errorMsg">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+
+  <div class="form-group">
+    <label class="form-label" for="userId">아이디</label>
+    <input class="form-input" id="userId" type="text" placeholder="아이디 입력" autocomplete="username">
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="userPw">비밀번호</label>
+    <input class="form-input" id="userPw" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
+  </div>
+
+  <button class="btn-login" onclick="doLogin()">로그인</button>
+
+  <div class="login-footer">HCNS Service · 권한이 있는 사용자만 접근 가능합니다.</div>
+</div>
+
+<script>
+const VALID_ID = 'admin';
+const VALID_PW = '0000';
+
+document.getElementById('userPw').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('userId').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('userPw').focus();
+});
+
+function doLogin() {
+  const id = document.getElementById('userId').value.trim();
+  const pw = document.getElementById('userPw').value;
+  const err = document.getElementById('errorMsg');
+
+  if (id === VALID_ID && pw === VALID_PW) {
+    sessionStorage.setItem('hcns_auth', 'true');
+    window.location.href = 'dashboard.html';
+  } else {
+    err.classList.add('show');
+    document.getElementById('userPw').value = '';
+    document.getElementById('userPw').focus();
+  }
+}
+
+if (sessionStorage.getItem('hcns_auth') === 'true') {
+  window.location.href = 'dashboard.html';
+}
+</script>
+</body>
+</html>
