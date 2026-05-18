@@ -307,6 +307,16 @@
     --shadow:       0 1px 3px rgba(0,0,0,0.4);
     --shadow-md:    0 4px 6px rgba(0,0,0,0.4);
   }
+  /* 다크모드에서 var(--dark)가 흰색으로 역전되는 요소 개별 보정 */
+  body.dark .nav-item.active {
+    background: #818CF8; color: #fff;
+  }
+  body.dark .refresh-btn {
+    background: #3F3F46; color: var(--text);
+  }
+  body.dark .refresh-btn:hover {
+    background: #818CF8; color: #fff;
+  }
 
   /* ── Responsive ── */
   @media (max-width:1280px) {
@@ -333,13 +343,14 @@
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">현장 목록</div>
-    <a class="nav-item" href="dashboard_SIH2FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">SIH2FC</span><span class="nav-badge">0%</span></a>
-<a class="nav-item" href="dashboard_CHW1FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">CHW1FC</span><span class="nav-badge">46%</span></a>
-<a class="nav-item active" href="dashboard_ECH2FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">ECH2FC</span><span class="nav-badge">5%</span></a>
+    <a class="nav-item" href="dashboard_SIH2FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">SIH2FC</span><span class="nav-badge">71%</span></a>
+<a class="nav-item" href="dashboard_CHW1FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">CHW1FC</span><span class="nav-badge">37%</span></a>
+<a class="nav-item active" href="dashboard_ECH2FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">ECH2FC</span><span class="nav-badge">39%</span></a>
 <a class="nav-item" href="dashboard_CHW2FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">CHW2FC</span><span class="nav-badge">0%</span></a>
-<a class="nav-item" href="dashboard_DON1FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">DON1FC</span><span class="nav-badge">0%</span></a>
 <a class="nav-item" href="dashboard_MCN1FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">MCN1FC</span><span class="nav-badge">0%</span></a>
-<a class="nav-item" href="dashboard_etc.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">기타</span><span class="nav-badge">0%</span></a>
+<a class="nav-item" href="dashboard_GOY1FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">GOY1FC</span><span class="nav-badge">0%</span></a>
+<a class="nav-item" href="dashboard_DON1FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">DON1FC</span><span class="nav-badge">0%</span></a>
+<a class="nav-item" href="dashboard_ANS8FC.html"><svg class="nav-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18"/><path d="M3 9h6"/><path d="M3 15h6"/><path d="M13 7h4"/><path d="M13 11h4"/><path d="M13 15h4"/></svg><span class="nav-label">ANS8FC</span><span class="nav-badge">0%</span></a>
 
   </nav>
   <div class="sidebar-footer">
@@ -360,7 +371,7 @@
         </svg>
       </button>
       <div class="topbar-badge"><span class="live-dot"></span>실시간 동기화</div>
-      <span class="topbar-time">업데이트 15:44</span>
+      <span class="topbar-time">업데이트 10:27</span>
       <button class="logout-btn" onclick="doLogout()" title="로그아웃">로그아웃</button>
     </div>
   </header>
@@ -369,10 +380,10 @@
 
     <div class="page-header">
       <div>
-        <div class="page-title">전체 진행률 <span class="pct-highlight">5.3%</span></div>
+        <div class="page-title">전체 진행률 <span class="pct-highlight">38.9%</span></div>
         <div class="page-meta">
           <span><span class="live-dot" style="display:inline-block;"></span> 실시간 동기화</span>
-          <span>● 마지막 업데이트 15:44</span>
+          <span>● 마지막 업데이트 10:27</span>
           <span>📋 작업 항목 6개</span>
         </div>
       </div>
@@ -385,25 +396,25 @@
     <div class="hero-content">
       <div class="hero-left">
         <div class="hero-label">전체 진행률</div>
-        <div class="hero-number">15<span class="hero-unit"> / 284 sets</span></div>
-        <div class="hero-sub">전달까지 269 sets</div>
-        <span class="hero-badge-bad">지연</span>
+        <div class="hero-number">7<span class="hero-unit"> / 18 sets</span></div>
+        <div class="hero-sub">전달까지 11 sets</div>
+        <span class="hero-badge-good">진행 중</span>
       </div>
       <div class="hero-ring-wrap">
-        <div class="hero-ring" style="background:conic-gradient(#FF6B35 5.3%, rgba(255,255,255,0.12) 5.3%);">
-          <div class="hero-ring-inner"><span class="hero-pct">5%</span></div>
+        <div class="hero-ring" style="background:conic-gradient(#FF6B35 38.9%, rgba(255,255,255,0.12) 38.9%);">
+          <div class="hero-ring-inner"><span class="hero-pct">39%</span></div>
         </div>
       </div>
     </div>
-    <div class="hero-bar-track"><div class="hero-bar-fill" style="width:5.3%;"></div></div>
+    <div class="hero-bar-track"><div class="hero-bar-fill" style="width:38.9%;"></div></div>
   </div>
 
   <div class="card kpi-sm">
     <div class="kpi-sm-label">작업 일수</div>
-    <div class="kpi-sm-number">4<span class="kpi-sm-unit"> 일</span></div>
+    <div class="kpi-sm-number">3<span class="kpi-sm-unit"> 일</span></div>
     <div class="kpi-sm-sub">실제 작업 진행일</div>
     <span class="kpi-sm-badge">기록됨</span>
-    <div class="kpi-sm-bar"><div class="kpi-sm-fill" style="width:8%; background:var(--indigo);"></div></div>
+    <div class="kpi-sm-bar"><div class="kpi-sm-fill" style="width:6%; background:var(--indigo);"></div></div>
   </div>
 
   <div class="card kpi-sm">
@@ -416,7 +427,7 @@
 
   <div class="card kpi-sm">
     <div class="kpi-sm-label">누적 사용 M-DAY</div>
-    <div class="kpi-sm-number">51<span class="kpi-sm-unit"> md</span></div>
+    <div class="kpi-sm-number">16<span class="kpi-sm-unit"> md</span></div>
     <div class="kpi-sm-sub">사용률 —</div>
     <span class="kpi-sm-badge">누적</span>
     <div class="kpi-sm-bar"><div class="kpi-sm-fill" style="width:0%; background:var(--indigo);"></div></div>
@@ -424,9 +435,9 @@
 
   <div class="card kpi-sm">
     <div class="kpi-sm-label">금일 사용 M-DAY</div>
-    <div class="kpi-sm-number">-<span class="kpi-sm-unit"> md</span></div>
+    <div class="kpi-sm-number">-<span class="kpi-sm-unit"> / - md</span></div>
     <div class="kpi-sm-sub">오늘 투입 인원</div>
-    <span class="kpi-sm-badge">오늘</span>
+    <span class="kpi-sm-badge" style="color:#6B7280; border-color:#6B7280;">오늘</span>
     <div class="kpi-sm-bar"><div class="kpi-sm-fill" style="width:0%; background:var(--green);"></div></div>
   </div>
 </div>
@@ -449,7 +460,7 @@
       <span class="work-tag tag-type">Gap guarding</span>
     </div>
     <div class="work-bottom">
-      <span class="work-plan-val">3 / 0 sets</span>
+      <span class="work-plan-val">0 / 0 sets</span>
       <span class="work-pct-val" style="color:#EF4444;">0.0%</span>
     </div>
     <div class="work-bar-track"><div class="work-bar-fill" style="width:0.0%; background:#EF4444;"></div></div>
@@ -466,7 +477,7 @@
       <span class="work-tag tag-type">Gap guarding</span>
     </div>
     <div class="work-bottom">
-      <span class="work-plan-val">9 / 0 sets</span>
+      <span class="work-plan-val">0 / 0 sets</span>
       <span class="work-pct-val" style="color:#EF4444;">0.0%</span>
     </div>
     <div class="work-bar-track"><div class="work-bar-fill" style="width:0.0%; background:#EF4444;"></div></div>
@@ -491,7 +502,7 @@
   <div class="work-card">
     <div class="work-card-top">
       <div class="work-icon" style="background:#F59E0B18; color:#F59E0B;">🔌</div>
-      <span class="work-badge wbadge-bad">지연</span>
+      <span class="work-badge wbadge-done">완료</span>
     </div>
     <div class="work-name">PB#01 Cable</div>
     <div class="work-desc">PB#01 Cable Installation</div>
@@ -500,15 +511,15 @@
       <span class="work-tag tag-type">Cable</span>
     </div>
     <div class="work-bottom">
-      <span class="work-plan-val">3 / 284 ea</span>
-      <span class="work-pct-val" style="color:#EF4444;">1.1%</span>
+      <span class="work-plan-val">7 / 6 ea</span>
+      <span class="work-pct-val" style="color:#4F46E5;">116.7%</span>
     </div>
-    <div class="work-bar-track"><div class="work-bar-fill" style="width:1.1%; background:#EF4444;"></div></div>
+    <div class="work-bar-track"><div class="work-bar-fill" style="width:100.0%; background:#4F46E5;"></div></div>
   </div>
   <div class="work-card">
     <div class="work-card-top">
       <div class="work-icon" style="background:#F59E0B18; color:#F59E0B;">🔌</div>
-      <span class="work-badge wbadge-warn">점검 필요</span>
+      <span class="work-badge wbadge-bad">지연</span>
     </div>
     <div class="work-name">PB#02 Cable</div>
     <div class="work-desc">PB#02 Cable Installation</div>
@@ -517,7 +528,7 @@
       <span class="work-tag tag-type">Cable</span>
     </div>
     <div class="work-bottom">
-      <span class="work-plan-val">0 / 0 ea</span>
+      <span class="work-plan-val">0 / 6 ea</span>
       <span class="work-pct-val" style="color:#EF4444;">0.0%</span>
     </div>
     <div class="work-bar-track"><div class="work-bar-fill" style="width:0.0%; background:#EF4444;"></div></div>
@@ -525,7 +536,7 @@
   <div class="work-card">
     <div class="work-card-top">
       <div class="work-icon" style="background:#F59E0B18; color:#F59E0B;">🔌</div>
-      <span class="work-badge wbadge-warn">점검 필요</span>
+      <span class="work-badge wbadge-bad">지연</span>
     </div>
     <div class="work-name">CB Cable</div>
     <div class="work-desc">CB Cable Installation</div>
@@ -534,7 +545,7 @@
       <span class="work-tag tag-type">Cable</span>
     </div>
     <div class="work-bottom">
-      <span class="work-plan-val">0 / 0 ea</span>
+      <span class="work-plan-val">0 / 6 ea</span>
       <span class="work-pct-val" style="color:#EF4444;">0.0%</span>
     </div>
     <div class="work-bar-track"><div class="work-bar-fill" style="width:0.0%; background:#EF4444;"></div></div>
@@ -567,36 +578,8 @@
         <div class="act-meta">ECH2FC · 기록 완료</div>
       </div>
       <div class="act-qty-col">
-        <div class="act-qty">1</div>
+        <div class="act-qty">2</div>
         <div class="act-qty-unit">ea</div>
-      </div>
-    </div>
-    <div class="act-item">
-      <div class="act-date-col">
-        <div class="act-day">29</div>
-        <div class="act-dow">WED</div>
-      </div>
-      <div class="act-body">
-        <div class="act-title">PB#01 Gap guarding <span class="act-badge act-done">Done</span></div>
-        <div class="act-meta">ECH2FC · 기록 완료</div>
-      </div>
-      <div class="act-qty-col">
-        <div class="act-qty">1</div>
-        <div class="act-qty-unit">sets</div>
-      </div>
-    </div>
-    <div class="act-item">
-      <div class="act-date-col">
-        <div class="act-day">29</div>
-        <div class="act-dow">WED</div>
-      </div>
-      <div class="act-body">
-        <div class="act-title">PB#02 Gap guarding <span class="act-badge act-done">Done</span></div>
-        <div class="act-meta">ECH2FC · 기록 완료</div>
-      </div>
-      <div class="act-qty-col">
-        <div class="act-qty">3</div>
-        <div class="act-qty-unit">sets</div>
       </div>
     </div>
     <div class="act-item">
@@ -609,36 +592,8 @@
         <div class="act-meta">ECH2FC · 기록 완료</div>
       </div>
       <div class="act-qty-col">
-        <div class="act-qty">1</div>
+        <div class="act-qty">4</div>
         <div class="act-qty-unit">ea</div>
-      </div>
-    </div>
-    <div class="act-item">
-      <div class="act-date-col">
-        <div class="act-day">28</div>
-        <div class="act-dow">TUE</div>
-      </div>
-      <div class="act-body">
-        <div class="act-title">PB#01 Gap guarding <span class="act-badge act-done">Done</span></div>
-        <div class="act-meta">ECH2FC · 기록 완료</div>
-      </div>
-      <div class="act-qty-col">
-        <div class="act-qty">1</div>
-        <div class="act-qty-unit">sets</div>
-      </div>
-    </div>
-    <div class="act-item">
-      <div class="act-date-col">
-        <div class="act-day">28</div>
-        <div class="act-dow">TUE</div>
-      </div>
-      <div class="act-body">
-        <div class="act-title">PB#02 Gap guarding <span class="act-badge act-done">Done</span></div>
-        <div class="act-meta">ECH2FC · 기록 완료</div>
-      </div>
-      <div class="act-qty-col">
-        <div class="act-qty">3</div>
-        <div class="act-qty-unit">sets</div>
       </div>
     </div>
     <div class="act-item">
@@ -653,34 +608,6 @@
       <div class="act-qty-col">
         <div class="act-qty">1</div>
         <div class="act-qty-unit">ea</div>
-      </div>
-    </div>
-    <div class="act-item">
-      <div class="act-date-col">
-        <div class="act-day">9</div>
-        <div class="act-dow">THU</div>
-      </div>
-      <div class="act-body">
-        <div class="act-title">PB#01 Gap guarding <span class="act-badge act-done">Done</span></div>
-        <div class="act-meta">ECH2FC · 기록 완료</div>
-      </div>
-      <div class="act-qty-col">
-        <div class="act-qty">1</div>
-        <div class="act-qty-unit">sets</div>
-      </div>
-    </div>
-    <div class="act-item">
-      <div class="act-date-col">
-        <div class="act-day">9</div>
-        <div class="act-dow">THU</div>
-      </div>
-      <div class="act-body">
-        <div class="act-title">PB#02 Gap guarding <span class="act-badge act-done">Done</span></div>
-        <div class="act-meta">ECH2FC · 기록 완료</div>
-      </div>
-      <div class="act-qty-col">
-        <div class="act-qty">3</div>
-        <div class="act-qty-unit">sets</div>
       </div>
     </div>
       </div>
@@ -690,7 +617,7 @@
 
   <footer>
     <div>HCNS Service · CBS Improvement Project · ECH2FC</div>
-    <div>2026-05-14 15:44</div>
+    <div>2026-05-18 10:27</div>
   </footer>
 </div>
 </div>
@@ -718,14 +645,16 @@ function toggleTheme() {
 Chart.defaults.font.family = "'Pretendard', sans-serif";
 Chart.defaults.color = '#9CA3AF';
 
-const trendData   = [4.0, 5.0, 5.0, 1.0];
-const trendLabels = ["4/9", "4/28", "4/29", "4/30"];
+const trendData   = [1.0, 4.0, 2.0];
+const trendLabels = ["4/28", "4/29", "4/30"];
 const movingAvg   = trendData.map((_, i) => {
   const s = trendData.slice(Math.max(0, i-4), i+1);
   return s.reduce((a,b) => a+b, 0) / s.length;
 });
 
-const tCtx = document.getElementById('trend').getContext('2d');
+const trendCanvas = document.getElementById('trend');
+if (trendCanvas && trendData.length > 0) {
+const tCtx = trendCanvas.getContext('2d');
 const grad = tCtx.createLinearGradient(0, 0, 0, 200);
 grad.addColorStop(0, 'rgba(79,70,229,0.18)');
 grad.addColorStop(1, 'rgba(79,70,229,0.0)');
@@ -752,6 +681,7 @@ new Chart(tCtx, {
     interaction: { mode:'index', intersect:false }
   }
 });
+}
 </script>
 </body>
 </html>

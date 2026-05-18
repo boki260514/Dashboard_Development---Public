@@ -11,12 +11,27 @@
 # ============================================================
 # 엑셀 파일 경로 (트래킹 시트)
 # ============================================================
+# 회사 표준 양식 파일명이 "..._M-day Tracking Sheet_YYYY.MM.DD_NN.xlsx" 형식으로
+# 매번 새 버전이 들어오므로, 상위 폴더에서 *Tracking Sheet*.xlsx 패턴 중 가장
+# 최근 파일(파일명 사전순)을 자동으로 메인 트래커로 선택한다.
+# - 옛 파일은 backups/ 로 옮기면 자동으로 후보에서 빠짐.
+# - fallback: 매칭이 없으면 옛 단순 이름(HCNSSERVICE_Tracking_v2.xlsx) 사용.
 import os as _os
+import glob as _glob
 _HERE = _os.path.dirname(_os.path.abspath(__file__))
-EXCEL_PATH = _os.path.join(
-    _os.path.dirname(_HERE),
-    "HCNSSERVICE_Tracking_v2.xlsx",
-)
+_DATA_DIR = _os.path.dirname(_HERE)
+
+
+def _find_latest_tracker() -> str:
+    candidates = _glob.glob(_os.path.join(_DATA_DIR, "*Tracking Sheet*.xlsx"))
+    # backups/ 안의 사본은 _DATA_DIR/backups 라 위 glob에 포함 안 됨 (다른 디렉터리)
+    if candidates:
+        return sorted(candidates)[-1]
+    legacy = _os.path.join(_DATA_DIR, "HCNSSERVICE_Tracking_v2.xlsx")
+    return legacy
+
+
+EXCEL_PATH = _find_latest_tracker()
 
 # 백업 폴더 (엑셀 파일과 같은 폴더 안에 backups/ 자동 생성)
 BACKUP_FOLDER_NAME = "backups"
@@ -69,6 +84,20 @@ SITE_MAPPING = {
     "마산1": "MCN1FC",
     "mcn1fc": "MCN1FC",
     "mcn1": "MCN1FC",
+
+    # 쿠팡 고양 1센터 (신규 - 2026-05-15 추가)
+    "쿠팡고양1센터": "GOY1FC",
+    "고양1센터": "GOY1FC",
+    "고양1": "GOY1FC",
+    "goy1fc": "GOY1FC",
+    "goy1": "GOY1FC",
+
+    # 쿠팡 안성 8센터 (신규 - 2026-05-15 추가)
+    "쿠팡안성8센터": "ANS8FC",
+    "안성8센터": "ANS8FC",
+    "안성8": "ANS8FC",
+    "ans8fc": "ANS8FC",
+    "ans8": "ANS8FC",
 }
 
 
@@ -228,6 +257,42 @@ ROW_MAPPING = {
         "cb#2_하네스케이블": "CB#02 Cable Installation",
         "cb#02_하네스케이블": "CB#02 Cable Installation",
     },
+
+    "GOY1FC": {
+        # PB-A-1, PB-A-2 (A 그룹)
+        "pb-a-1line_gapcover": "PB-A-1 Gap guarding Installation",
+        "pb-a-1_gapcover": "PB-A-1 Gap guarding Installation",
+        "pba1line_gapcover": "PB-A-1 Gap guarding Installation",
+        "pb-a-2line_gapcover": "PB-A-2 Gap guarding Installation",
+        "pb-a-2_gapcover": "PB-A-2 Gap guarding Installation",
+        "pba2line_gapcover": "PB-A-2 Gap guarding Installation",
+
+        # PB-B-1, PB-B-2 (B 그룹)
+        "pb-b-1line_gapcover": "PB-B-1 Gap guarding Installation",
+        "pb-b-1_gapcover": "PB-B-1 Gap guarding Installation",
+        "pbb1line_gapcover": "PB-B-1 Gap guarding Installation",
+        "pb-b-2line_gapcover": "PB-B-2 Gap guarding Installation",
+        "pb-b-2_gapcover": "PB-B-2 Gap guarding Installation",
+        "pbb2line_gapcover": "PB-B-2 Gap guarding Installation",
+
+        # CB-1, CB-2
+        "cb-1line_gapcover": "CB-1 Gap guarding Installation",
+        "cb-1_gapcover": "CB-1 Gap guarding Installation",
+        "cb1line_gapcover": "CB-1 Gap guarding Installation",
+        "cb-2line_gapcover": "CB-2 Gap guarding Installation",
+        "cb-2_gapcover": "CB-2 Gap guarding Installation",
+        "cb2line_gapcover": "CB-2 Gap guarding Installation",
+    },
+
+    "ANS8FC": {
+        # CB#01 Cable Installation만 있음
+        "cb#1line_cable": "CB#01 Cable Installation",
+        "cb#01line_cable": "CB#01 Cable Installation",
+        "cb#1_cable": "CB#01 Cable Installation",
+        "cb#01_cable": "CB#01 Cable Installation",
+        "cb#1_하네스케이블": "CB#01 Cable Installation",
+        "cb#01_하네스케이블": "CB#01 Cable Installation",
+    },
 }
 
 
@@ -301,5 +366,7 @@ PLAN_MDAY_BY_SITE = {
     "ECH2FC": 0,
     "DON1FC": 0,
     "MCN1FC": 0,
+    "GOY1FC": 0,   # 2026-05-15 추가 (값 미확인)
+    "ANS8FC": 0,   # 2026-05-15 추가 (값 미확인)
     "None PJT": 0,
 }

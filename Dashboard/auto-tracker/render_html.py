@@ -130,6 +130,7 @@ def render_kpi_cards(site: SiteData) -> str:
     plan_md   = _fmt_mday(site.total_plan_mday)
     used_md   = _fmt_mday(site.total_used_mday)
     today_md  = _fmt_mday(site.total_today_mday)
+    today_plan_md = _fmt_mday(site.total_today_plan)
     pct_c     = min(pct, 100)
 
     if pct >= 100:
@@ -140,6 +141,32 @@ def render_kpi_cards(site: SiteData) -> str:
         s_text, s_cls = "지연", "hero-badge-bad"
 
     mday_pct = min(site.total_used_mday / max(site.total_plan_mday, 1) * 100, 100) if site.total_plan_mday > 0 else 0
+
+    # 금일 사용 vs 금일 계획 비교 — 사용자가 'Plan 행'을 일별 계획 멘데이로 참조함
+    used_v = site.total_today_mday
+    plan_v = site.total_today_plan
+    if plan_v > 0:
+        if used_v > plan_v:
+            today_sub_text = f"계획 {today_plan_md} · 초과 +{_fmt_mday(used_v - plan_v)}"
+            today_badge_text, today_badge_color = "⚠ 초과", "#DC2626"
+            today_bar_pct = 100
+            today_bar_color = "#DC2626"  # red
+        elif used_v > 0:
+            today_sub_text = f"계획 {today_plan_md} · 정상"
+            today_badge_text, today_badge_color = "✓ 정상", "#10B981"
+            today_bar_pct = min(used_v / plan_v * 100, 100)
+            today_bar_color = "#10B981"  # green
+        else:
+            today_sub_text = f"계획 {today_plan_md} · 미투입"
+            today_badge_text, today_badge_color = "대기", "#6B7280"
+            today_bar_pct = 0
+            today_bar_color = "#9CA3AF"
+    else:
+        # 계획 없음 — 기존 동작 유지
+        today_sub_text = "오늘 투입 인원"
+        today_badge_text, today_badge_color = "오늘", "#6B7280"
+        today_bar_pct = 0
+        today_bar_color = "var(--green)"
 
     return f"""
 <div class="kpi-5">
@@ -186,10 +213,10 @@ def render_kpi_cards(site: SiteData) -> str:
 
   <div class="card kpi-sm">
     <div class="kpi-sm-label">금일 사용 M-DAY</div>
-    <div class="kpi-sm-number">{today_md}<span class="kpi-sm-unit"> md</span></div>
-    <div class="kpi-sm-sub">오늘 투입 인원</div>
-    <span class="kpi-sm-badge">오늘</span>
-    <div class="kpi-sm-bar"><div class="kpi-sm-fill" style="width:0%; background:var(--green);"></div></div>
+    <div class="kpi-sm-number">{today_md}<span class="kpi-sm-unit"> / {today_plan_md} md</span></div>
+    <div class="kpi-sm-sub">{today_sub_text}</div>
+    <span class="kpi-sm-badge" style="color:{today_badge_color}; border-color:{today_badge_color};">{today_badge_text}</span>
+    <div class="kpi-sm-bar"><div class="kpi-sm-fill" style="width:{today_bar_pct:.0f}%; background:{today_bar_color};"></div></div>
   </div>
 </div>"""
 
@@ -596,6 +623,16 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     --shadow:       0 1px 3px rgba(0,0,0,0.4);
     --shadow-md:    0 4px 6px rgba(0,0,0,0.4);
   }}
+  /* 다크모드에서 var(--dark)가 흰색으로 역전되는 요소 개별 보정 */
+  body.dark .nav-item.active {{
+    background: #818CF8; color: #fff;
+  }}
+  body.dark .refresh-btn {{
+    background: #3F3F46; color: var(--text);
+  }}
+  body.dark .refresh-btn:hover {{
+    background: #818CF8; color: #fff;
+  }}
 
   /* ── Responsive ── */
   @media (max-width:1280px) {{
@@ -661,7 +698,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           <span class="legend-item"><span class="legend-dot" style="background:var(--indigo);"></span>일별 작업량</span>
           <span class="legend-item"><span class="legend-dot" style="background:#D1D5DB;"></span>이동 평균 (5일)</span>
         </div>
-        <div class="chart-wrap"><canvas id="trend"></canvas></div>
+        <div class="chart-wrap">{chart_body_html}</div>
       </div>
       <div class="card activity-panel">
         <div class="activity-panel-title">📋 최근 작업</div>
@@ -709,7 +746,9 @@ const movingAvg   = trendData.map((_, i) => {{
   return s.reduce((a,b) => a+b, 0) / s.length;
 }});
 
-const tCtx = document.getElementById('trend').getContext('2d');
+const trendCanvas = document.getElementById('trend');
+if (trendCanvas && trendData.length > 0) {{
+const tCtx = trendCanvas.getContext('2d');
 const grad = tCtx.createLinearGradient(0, 0, 0, 200);
 grad.addColorStop(0, 'rgba(79,70,229,0.18)');
 grad.addColorStop(1, 'rgba(79,70,229,0.0)');
@@ -736,6 +775,7 @@ new Chart(tCtx, {{
     interaction: {{ mode:'index', intersect:false }}
   }}
 }});
+}}
 </script>
 </body>
 </html>
@@ -756,8 +796,19 @@ def render_dashboard(data: DashboardData, active_site_code: Optional[str] = None
     if active_site is None:
         return "<html><body><h1>데이터 없음</h1></body></html>"
 
-    site_trend = active_site.daily_trend or data.daily_trend
+    # 추이 그래프는 반드시 active_site의 데이터만 사용한다.
+    # 이전에 `active_site.daily_trend or data.daily_trend` 로 fallback을 했더니,
+    # 작업 기록이 없는 현장(예: SIH2FC)이 다른 현장의 일별 추이를 자기 그래프로
+    # 끌어다 보여주는 버그가 있었음. (2026-05-14 SIH2FC 사례)
+    site_trend = active_site.daily_trend
     chart_labels_json, chart_data_json = render_chart_data(site_trend)
+    if site_trend:
+        chart_body_html = '<canvas id="trend"></canvas>'
+    else:
+        chart_body_html = (
+            '<div class="act-empty" style="height:100%;display:flex;'
+            'align-items:center;justify-content:center;">추이 데이터 없음</div>'
+        )
 
     sidebar_html     = render_sidebar(data.sites, active_site.site_code)
     kpi_html         = render_kpi_cards(active_site)
@@ -781,6 +832,7 @@ def render_dashboard(data: DashboardData, active_site_code: Optional[str] = None
         kpi_html          = kpi_html,
         mid_html          = mid_html,
         right_panel_html  = right_panel_html,
+        chart_body_html   = chart_body_html,
         chart_data_json   = chart_data_json,
         chart_labels_json = chart_labels_json,
     )

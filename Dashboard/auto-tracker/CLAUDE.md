@@ -15,7 +15,7 @@
 
 | 파이프라인 | 메인 스크립트 | 처리 대상 | 출력 |
 |---|---|---|---|
-| ① 작업일보 자동화 (구) | `email_fetcher.py` | 특정 발신자 + '업무일지' 제목 메일 | `../HCNSSERVICE_Tracking_v2.xlsx` |
+| ① 작업일보 자동화 (구) | `email_fetcher.py` | 특정 발신자 + '작업일보' 제목 메일 | `../HCNS Service_..._M-day Tracking Sheet_*.xlsx` (자동 선택) |
 | ② 일반 메일 로그 (신) | `mail_log_fetcher.py` | INBOX 전체 업무 메일 | `../Mail_Log.xlsx` + 작업일보 첨부도 ①과 동일 트래커에 함께 반영 |
 
 두 파이프라인 모두 같은 IMAP 계정·같은 `.env`·같은 트래커 파일을 공유한다.
@@ -41,7 +41,7 @@
        │                                                     │
        ↓                                                     ↓
 ┌──────────────────────────────┐              ┌──────────────────────────────┐
-│ HCNSSERVICE_Tracking_v2.xlsx │              │ Mail_Log.xlsx                │
+│ ..._M-day Tracking Sheet_*   │              │ Mail_Log.xlsx                │
 │  · 현장별 시트 (CHW1FC 등)    │              │  · Mail_Log 시트 (20컬럼)     │
 │  · backups/ 자동 백업          │              │  · Run_Log 시트              │
 └──────────────────────────────┘              └──────────────────────────────┘
@@ -61,7 +61,8 @@
 ### 파이프라인 ①: 작업일보 (기존)
 - `email_fetcher.py` — IMAP 검색·첨부 다운로드·미수신 알림 (SMTP).
 - `excel_parser.py` — 작업일보 첨부(.xlsx) → `DailyReport` 변환. **C2=공사명, C3=일자, B7=수량텍스트, E38~E42=인원** 가정.
-- `excel_updater.py` — `DailyReport` → `HCNSSERVICE_Tracking_v2.xlsx` 셀 단위 업데이트 + `backups/` 자동.
+- `excel_updater.py` — `DailyReport` → 트래커(`config.EXCEL_PATH`) 셀 단위 업데이트 + `backups/` 자동.
+  헤더 행은 시트별로 동적 탐지(`Date` 라벨 위치 기반).
 - `parser.py` — 카톡 메시지 → `DailyReport` 변환 (구 카톡 경로). `update_tracker.py`와 함께 사용.
 - `update_tracker.py` — 카톡 페이스트 → 트래커 업데이트 CLI.
 - `make_dashboard.py` — 트래커 → `dashboard.html` + 현장별 HTML.
@@ -201,6 +202,37 @@
 
 ## 7. 알려진 이슈 / 호환성 메모
 
+### 7.-2 사용자가 새 트래커 파일을 보내면 임의 백필 금지 (2026-05-15 사례)
+- 사용자가 회사 표준 양식 트래커 새 버전을 전달하면 **그 파일 자체가 진실의 원천**이다.
+  과거에 백필한 데이터가 새 파일에 없어도 자동으로 다시 백필하지 말 것.
+  사용자가 명시적으로 "어제 백필도 재반영해" 같은 지시를 주기 전에는 그대로 둔다.
+- 자동 백필이 위험한 또 다른 이유: `excel_updater`가 셀에 직접 입력하면서 시트의 다른 셀의 수식 결과 캐시(data_only 값)가 일부 invalidate 될 수 있음. 그 결과 다른 시트의 daily_trend가 사라진 것처럼 보일 수 있음.
+
+### 7.-3 일별 계획값(Plan 행)을 멘데이 계획으로 사용 (2026-05-18)
+- 사용자 요청으로 트래커의 'Plan' 행 (= B열 항목명 + C='Plan' 표시되는 행)의 일별 셀 값을
+  '일별 계획 멘데이'로 취급. 실제로 그 값이 "수량 계획"인지 "멘데이 계획"인지는 회사 내부 표기에 따라 다를 수 있음.
+  사용자가 "Plan이라고 써있는 줄"이라고 명확히 지정.
+- 진짜 항목 행만 잡으려면 C='Plan' 라벨로 필터링 (B8 등의 카테고리 헤더 자동 제외).
+- 대시보드 '금일 사용 M-DAY' 카드에 `사용 X / 계획 Y` 형식 + 초과/정상/미투입 배지.
+- 한계: 트래커 시점이 오늘 이후 일자에는 Plan이 안 채워져 있을 수 있음 → 0/0으로 표시됨.
+
+### 7.-1 시트별 헤더 행 위치가 다를 수 있음 (해결됨 2026-05-15)
+- 회사 표준 양식인데도 시트마다 month_row/day_row가 다르다:
+  - 대부분: month_row=7, day_row=8 (B7=현장명, C7='Date', D7=월, D8=일자)
+  - **CHW1FC만**: month_row=8, day_row=9로 한 칸 밀려 있음
+- 그래서 `extract_data._find_header_rows()`와 `excel_updater.find_column_for_date()`는
+  C열에서 'Date' 라벨 위치를 동적으로 찾아 month_row/day_row 결정.
+
+### 7.0 대시보드 — 빈 현장에 타 현장 데이터가 보이는 버그 (해결됨 2026-05-14)
+- 증상: 작업 기록 0건인 현장(SIH2FC)의 `dashboard_SIH2FC.html` 추이 그래프에
+  다른 현장의 일별 작업량이 표시됨.
+- 원인: `render_html.render_dashboard()` 에서 `site_trend = active_site.daily_trend or data.daily_trend`
+  로 작성되어, 빈 리스트가 falsy하여 전체 통합 trend로 fallback함.
+- 수정: fallback 제거 (`site_trend = active_site.daily_trend`).
+  빈 데이터일 때 차트 영역에 "추이 데이터 없음" placeholder 표시.
+  JS에도 `trendCanvas && trendData.length > 0` guard 추가.
+- 교훈: **현장별 화면에는 절대 전체 통합 데이터로 fallback 금지**. 이 패턴이 다른 곳에도 있을 수 있으니 유사 코드 발견 시 즉시 확인.
+
 ### 7.1 작업일보 양식 vs 일일 업무일지 양식 (해결됨 2026-05-14)
 - "작업일보" ≠ "업무일지". 둘은 별개 메일이고 양식도 다름.
   - **작업일보**: 현장 진척 + 수량 데이터. `excel_parser.py`가 처리하는 표준 양식 (C2=공사명, C3=일자, B7=수량텍스트, E38~E42=인원).
@@ -318,6 +350,14 @@ python merge_tracker_from_email.py <첨부.xlsx> --apply REM 적용
 | 2026-05-14 | — | `batch_import_attachments.py` 신설 — 대용량 첨부 등 수동 일괄 처리 | `오늘_첨부/` 폴더 |
 | 2026-05-14 | — | `merge_tracker_from_email.py` 신설 — 트래커 사본 안전 머지 (보류) | 레이아웃 차이로 미적용 |
 | 2026-05-14 | — | 백필 1회 적용: 4/9, 4/21~30 작업일보 14개 → 트래커 69셀 업데이트 | CHW1FC + ECH2FC |
+| 2026-05-14 | `render_html.py` 추이 그래프 fallback 버그 수정 | 빈 현장이 타 현장 데이터 표시하던 문제 (SIH2FC 사례) |
+| 2026-05-15 | 트래커 회사 표준 양식으로 교체 (`HCNS Service_..._M-day Tracking Sheet_*.xlsx`) | 옛 `HCNSSERVICE_Tracking_v2.xlsx`는 backups/ |
+| 2026-05-15 | `config.EXCEL_PATH` glob 자동 탐색 (`_find_latest_tracker()`) | 폴더의 가장 최신 `*Tracking Sheet*.xlsx` 자동 선택 |
+| 2026-05-15 | 새 현장 추가: `GOY1FC` (PB-A/B-1·2 + CB-1·2), `ANS8FC` (CB#01 Cable) | SITE_MAPPING, ROW_MAPPING, PLAN_MDAY 갱신 |
+| 2026-05-15 | `extract_data._find_header_rows()`·`excel_updater.find_column_for_date()` 헤더 행 동적 탐지 | CHW1FC는 month_row=8, day_row=9 (한 칸 밀림) |
+| 2026-05-15 | 비-현장 시트(`Overall Sheet`, `Sheet`) 자동 제외 | 빈 SiteData도 제외 |
+| 2026-05-18 | 일별 계획값(Plan 행) 추출 + KPI '금일 사용 M-DAY' 카드에 계획 비교/초과 표시 | `WorkItem.today_plan`, `SiteData.total_today_plan` |
+| 2026-05-18 | `_find_item_rows()`가 C='Plan' 조건으로 카테고리 헤더(예: B8=`Cable Installation`) 자동 제외 | 진짜 항목만 카운트 |
 | 2026-05-14 15:30 | WJ | `render_html.py` 전면 재작성 — 새 레이아웃 적용 (KPI 5열 히어로 카드, 공종별 4열 그리드, 추이·활동 2열) | 사이드바 로고 추가, 다크 히어로 카드, conic-gradient 진행 링 |
 | 2026-05-14 15:45 | WJ | `login.html` 신설 + 대시보드 인증 체크 추가 — 미로그인 시 로그인 페이지로 리다이렉트 | 테스트 계정 admin/0000, 로그아웃 버튼, `index.html` 루트 리다이렉트 |
 

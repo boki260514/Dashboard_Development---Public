@@ -61,6 +61,8 @@ class WorkItem:
     # 멘데이(Man-day) 관련
     used_mday_total: float = 0.0    # Labor 행 누적 사용 멘데이
     today_mday: float = 0.0         # 오늘 사용 멘데이
+    today_plan: float = 0.0         # 오늘 계획 (Plan 행의 today 컬럼)
+    daily_plan: list[tuple[date, float]] = field(default_factory=list)
     # 최근 작업 정보
     last_date: Optional[date] = None
     last_qty: float = 0.0
@@ -89,6 +91,7 @@ class SiteData:
     total_plan_mday: float = 0.0     # 총 계획 멘데이 (config.PLAN_MDAY_BY_SITE 값)
     total_used_mday: float = 0.0     # 현재까지 누적 사용 멘데이
     total_today_mday: float = 0.0    # 금일 작업시 사용한 멘데이
+    total_today_plan: float = 0.0    # 금일 계획 (Plan 행의 today 컬럼 합)
 
     # 이 현장의 일별 추이 (작업이 있던 날만, 시간순)
     daily_trend: list = field(default_factory=list)
@@ -142,18 +145,24 @@ def _extract_short_name(label: str) -> tuple[str, str, str]:
 def _find_item_rows(ws) -> list[tuple[int, str]]:
     """
     시트에서 작업 항목들의 행 번호와 라벨을 찾아 반환.
-    
+
+    진짜 항목 행은 C열에 'Plan' 라벨이 있다.
+    (B8의 카테고리 헤더 'Cable Installation' 같은 건 C='Plan' 아니므로 자동 제외)
+
     Returns:
         [(row_num, label), ...] 형식
     """
     items = []
     for row in range(8, ws.max_row + 1):
         b_val = ws.cell(row=row, column=2).value
+        c_val = ws.cell(row=row, column=3).value
         if b_val and isinstance(b_val, str) and "Installation" in b_val:
             # "Installation / Hour" 헤더는 제외
             if "/ Hour" in b_val or "Hour" in b_val.split()[-1]:
                 continue
-            items.append((row, b_val.strip()))
+            # C열 라벨이 'Plan'인 항목만 — 카테고리 헤더(예: B8='Cable Installation') 자동 제외
+            if isinstance(c_val, str) and c_val.strip() == "Plan":
+                items.append((row, b_val.strip()))
     return items
 
 
@@ -206,27 +215,39 @@ def _read_total_cell(ws, ws_formula, row: int, total_col: int = None) -> float:
     return total
 
 
+def _find_header_rows(ws) -> tuple[int, int]:
+    """시트별로 (month_row, day_row) 동적 탐지. C열의 'Date' 라벨 위치로 판단."""
+    for r in range(5, 15):
+        v = ws.cell(row=r, column=3).value
+        if isinstance(v, str) and v.strip() == "Date":
+            return r, r + 1
+    return MONTH_ROW, DAY_ROW
+
+
 def _column_to_date(ws, col: int, year: int) -> Optional[date]:
     """
     워크시트의 컬럼 번호를 날짜로 변환.
-    7행에서 가장 가까운 월 헤더 찾고, 8행에서 일자 읽기.
+    시트별 헤더 행 위치를 동적으로 탐지해서 처리.
+    (예: CHW1FC는 r8=월, r9=일자로 한 칸 밀림)
     """
-    # 8행에서 일자
-    day = ws.cell(row=DAY_ROW, column=col).value
+    month_row, day_row = _find_header_rows(ws)
+
+    # day_row에서 일자
+    day = ws.cell(row=day_row, column=col).value
     if not isinstance(day, (int, float)):
         return None
-    
-    # 7행을 거슬러 올라가며 가장 최근 월 헤더 찾기
+
+    # month_row를 거슬러 올라가며 가장 최근 월 헤더 찾기
     month = None
     for c in range(col, 0, -1):
-        m = ws.cell(row=MONTH_ROW, column=c).value
+        m = ws.cell(row=month_row, column=c).value
         if m in MONTH_NAME_TO_NUM:
             month = MONTH_NAME_TO_NUM[m]
             break
-    
+
     if month is None:
         return None
-    
+
     try:
         return date(year, month, int(day))
     except ValueError:
@@ -285,6 +306,19 @@ def extract_site_data(ws, ws_formula=None, year: int = 2026) -> SiteData:
                 all_daily_values.append((d, float(v)))
                 if v > 0:
                     item.daily_data.append((d, float(v)))
+
+        # ====================================================
+        # 일별 계획값 수집 (Plan 행 = 항목명 행 자체. C='Plan'으로 표시되는 행)
+        # ====================================================
+        # 사용자가 "Plan 행"을 일별 계획 멘데이로 참조함.
+        # 각 일별 셀의 값 > 0인 것만 daily_plan에 저장하고,
+        # 오늘 컬럼의 값을 today_plan에 저장.
+        for col, d in date_col_map.items():
+            pv = ws.cell(row=row, column=col).value
+            if isinstance(pv, (int, float)) and pv > 0:
+                item.daily_plan.append((d, float(pv)))
+                if d == today:
+                    item.today_plan = float(pv)
 
         # ====================================================
         # 멘데이(M-day) 계산 - Labor 행
@@ -357,6 +391,7 @@ def extract_site_data(ws, ws_formula=None, year: int = 2026) -> SiteData:
     # 멘데이(M-day) 집계
     site.total_used_mday = sum(it.used_mday_total for it in site.items)
     site.total_today_mday = sum(it.today_mday for it in site.items)
+    site.total_today_plan = sum(it.today_plan for it in site.items)
     # total_plan_mday는 config에서 읽어 extract_dashboard_data에서 주입
     
     # 일별 추이 (모든 항목 통합)
@@ -474,10 +509,19 @@ def extract_dashboard_data(excel_path: str) -> DashboardData:
     except ImportError:
         PLAN_MDAY_BY_SITE = {}
 
+    # 비-현장 시트 제외 (요약/템플릿 시트는 대시보드에 안 보여야 함)
+    # 정책: 시트명이 명백히 비-현장 라벨이거나, 실제 작업 항목 행이 0개면 제외.
+    NON_SITE_SHEET_NAMES = {"Overall Sheet", "Sheet", "Overview", "Summary"}
+
     for sheet_name in wb_value.sheetnames:
+        if sheet_name in NON_SITE_SHEET_NAMES:
+            continue
         ws_value = wb_value[sheet_name]
         ws_formula = wb_formula[sheet_name]
         site = extract_site_data(ws_value, ws_formula, year=year)
+        # 항목이 하나도 없으면 비-현장(빈 템플릿)으로 보고 제외
+        if not site.items:
+            continue
         # 총 계획 멘데이 주입
         site.total_plan_mday = float(PLAN_MDAY_BY_SITE.get(sheet_name, 0) or 0)
         # 현장별 일별 추이 / 최근 활동 (사이트 1개만 넘겨서 계산)

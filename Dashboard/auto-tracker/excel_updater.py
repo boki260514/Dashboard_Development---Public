@@ -112,16 +112,25 @@ def find_date_column(
     target_month = target_date.month
     target_day = target_date.day
 
+    # 시트마다 헤더가 한 칸 밀려 있을 수 있음 (예: CHW1FC는 r8=월, r9=일자).
+    # C열에서 'Date' 라벨을 찾고 그 행을 month_row, 다음 행을 day_row로 사용.
+    month_row, day_row = MONTH_ROW, DAY_ROW
+    for r in range(5, 15):
+        v = ws.cell(row=r, column=3).value
+        if isinstance(v, str) and v.strip() == "Date":
+            month_row, day_row = r, r + 1
+            break
+
     # 현재 활성화된 월 컬럼 추적
     current_month = None
     for col in range(DATA_START_COL, ws.max_column + 1):
-        # 7행에 월 이름이 있으면 갱신
-        v_month = ws.cell(row=MONTH_ROW, column=col).value
+        # month_row에 월 이름이 있으면 갱신
+        v_month = ws.cell(row=month_row, column=col).value
         if v_month in MONTH_NAME_TO_NUM:
             current_month = MONTH_NAME_TO_NUM[v_month]
 
-        # 8행의 일자 확인
-        v_day = ws.cell(row=DAY_ROW, column=col).value
+        # day_row의 일자 확인
+        v_day = ws.cell(row=day_row, column=col).value
         if (current_month == target_month and
                 isinstance(v_day, (int, float)) and
                 int(v_day) == target_day):
